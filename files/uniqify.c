@@ -1,4 +1,3 @@
-
 /**
  *
  * Divide Program into 3 types of processes:
@@ -51,8 +50,56 @@
  *
  *
 **/
+	 
+/*__________________________HEADER STUFF______________________________________*/
+
+#include <stdio.h>
+#include <stdlib.h>
+// more includes...
+
+// functions go here:
+void parser();
+void rmdup();
+
+/*_________________________END HEADER STUFF___________________________________*/
+
+
+
 int main(int argc, char *argv[])
 {
 	// fill with stuff
 	return 0;
 }
+
+/**
+ * for now, just initializing the function
+ * will add args and return values when appropriate
+**/
+void parser()
+{
+	// parse stuff
+}
+
+/**
+ * rmdup => remove duplicates
+ *
+ * for now, just initializing the function
+ * will add args and return values when appropriate
+**/
+void rmdup()
+{
+	// removes duplicates from sorted list of wurds
+}
+
+
+
+
+
+
+
+
+	      /* This white space is used for viewing pleasure */
+
+
+
+/*_____________________________END OF FILE____________________________________*/
