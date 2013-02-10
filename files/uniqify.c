@@ -68,6 +68,14 @@ void rmdup();
 int main(int argc, char *argv[])
 {
 	// fill with stuff
+	
+	// parse the .txt file
+	parser();
+	
+	// sort
+	
+	// remove duplicates
+	rmdup();
 	return 0;
 }
 
