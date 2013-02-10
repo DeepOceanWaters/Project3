@@ -60,6 +60,10 @@
 // functions go here:
 void parser();
 void rmdup();
+void spike_fork();
+
+// test functions go here:
+void run_tests();
 
 /*_________________________END HEADER STUFF___________________________________*/
 
@@ -70,12 +74,15 @@ int main(int argc, char *argv[])
 	// fill with stuff
 	
 	// parse the .txt file
-	parser();
+	//parser();
 	
 	// sort
 	
 	// remove duplicates
-	rmdup();
+	//rmdup();
+	
+	// testing
+	spike_fork();
 	return 0;
 }
 
@@ -99,7 +106,48 @@ void rmdup()
 	// removes duplicates from sorted list of wurds
 }
 
+// Spikes
 
+void spike_fork()
+{
+	int result;
+	int status;
+	
+	printf("\nspike_fork: PARENT: forking once\n");
+	
+	switch((result = fork())){
+
+	case -1:
+		//in parent, oops
+		printf("spike_fork: PARENT: forking error\n");
+		perror("Forking failed");
+		exit(EXIT_FAILURE);
+		break;
+	case 0:
+		//child case
+
+		printf("spike_fork:  CHILD: closing.\n");
+		_exit(0);
+		break;
+	default:
+		//parent case -- result holds pid of child
+
+		wait(&status);
+		printf("spike_for: PARENT: child finished with status %d\n", status);
+
+		break;
+	}
+	
+	return;
+}
+
+
+// Tests
+
+void run_tests()
+{
+	
+}
 
 
 
