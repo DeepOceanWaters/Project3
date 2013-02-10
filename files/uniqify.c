@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	//rmdup();
 	
 	// testing
-	spike_fork();
+	spike_fork(10);
 	return 0;
 }
 
@@ -108,37 +108,44 @@ void rmdup()
 
 // Spikes
 
-void spike_fork()
+void spike_fork(int n)
 {
 	int result;
 	int status;
+	int i;
+	int child_pid;
 	
-	printf("\nspike_fork: PARENT: forking once\n");
+	for(i = 0; i < n; i++) {
+		printf("\nspike_fork: PARENT: forking once\n");
+		
+		switch((result = fork())){
 	
-	switch((result = fork())){
-
-	case -1:
-		//in parent, oops
-		printf("spike_fork: PARENT: forking error\n");
-		perror("Forking failed");
-		exit(EXIT_FAILURE);
-		break;
-	case 0:
-		//child case
-
-		printf("spike_fork:  CHILD: closing.\n");
-		_exit(0);
-		break;
-	default:
-		//parent case -- result holds pid of child
-
-		wait(&status);
-		printf("spike_for: PARENT: child finished with status %d\n", status);
-
-		break;
+		case -1:
+			//in parent, oops
+			printf("spike_fork:  PARENT: forking error\n");
+			perror("Forking failed");
+			exit(EXIT_FAILURE);
+			break;
+		case 0:
+			//child case
+		
+			printf("spike_fork: CHILD[%d]: closing.\n", i);
+			_exit(0);
+			break;
+		default:
+			//parent case -- result holds pid of child
+			break;
+		}
 	}
 	
-	return;
+	while((child_pid = wait(&status) != -1))
+		printf("...\n");
+	printf("spike_fork: finished waiting for children?\n");
+	if(errno != ECHILD) {
+		perror("Error with child");
+		exit(EXIT_FAILURE);
+	}
+	
 }
 
 
