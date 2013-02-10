@@ -55,6 +55,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <sys/wait.h>
 // more includes...
 
 // functions go here:
