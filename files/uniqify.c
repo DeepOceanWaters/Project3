@@ -61,13 +61,14 @@
 // more includes...
 
 // defines...
-#define SET_RED     "\x1b[31m"
-#define SET_GREEN   "\x1b[32m"
-#define SET_YELLOW  "\x1b[33m"
-#define SET_BLUE    "\x1b[34m"
-#define SET_MAGENTA "\x1b[35m"
-#define SET_CYAN    "\x1b[36m"
-#define RESET_DA_COLOR   "\x1b[0m"
+#define SET_RED     	"\x1b[31m"
+#define SET_GREEN   	"\x1b[32m"
+#define SET_YELLOW  	"\x1b[33m"
+#define SET_BLUE    	"\x1b[34m"
+#define SET_MAGENTA 	"\x1b[35m"
+#define SET_CYAN    	"\x1b[36m"
+#define RESET_DA_COLOR  "\x1b[0m"
+#define MAXLINE		512
 
 // functions go here:
 void parser();
@@ -213,56 +214,40 @@ void spike_fork()
 
 void spike_pipe()
 {
+	char line[MAXLINE];
+	FILE *fpin;
+	FILE *fpout;
 	int result;
-	int status;
-	char *buf;
-	FILE *in_out;
-	
-	buf = (char *) malloc(10 * sizeof(char));
-	
-	int pipefds[2];
-	
-	printf("spike_pipe: starting spike test\n");
-	if(pipe(pipefds) != 0){
-		perror("Pipes are screwed up, call a plumber");
-		exit(-1);
-	}
-	
-	switch((result = fork())){
+	int fd[2];
+	int i;
 
-	case -1:
-		//in parent, oops
-		printf("spike_pipe:  PARENT: forking error\n");
-		perror("Forking failed");
-		exit(EXIT_FAILURE);
-		break;
-	case 0:
-		//child case
-		printf("spike_pipe:   CHILD: closing one end of pipe\n");
-		close(pipefds[0]);
-		printf("spike_pipe:   CHILD: writing to pipe\n");
-		buf = "tenthline\0";
-		in_out = fdopen(pipefds[1], "w");
-		if(fputs(buf, in_out) != 's'){
-			perror("fputs");
-			_exit(EXIT_FAILURE);
-		}
-		close(pipefds[1]);
-		fclose(in_out);
+	pipe(fd);
+
+	switch((result = fork())) {
+
+	case 0: 
+		close(fd[0]);
+	
+		fpout = fdopen(fd[1], "w");
+	
+		for(i = 0; i < 10; i++)
+			fprintf(fpout, "%s\n", "jeronimooo...");
+	
+		fclose(fpout);
 		_exit(EXIT_SUCCESS);
 		break;
 	default:
-		//parent case -- result holds pid of child
-
-		close(pipefds[1]);
-		wait(&status);
-		in_out = fdopen(pipefds[0], "r");
-		fgets(buf, 10, in_out);
-		printf("spike_pipe: printing contents...\n\tcontents: %s\n",
-			buf);
-
+		close(fd[1]);
+	
+		fpin = fdopen(fd[0], "r");
+	
+		while(fgets(line, MAXLINE, fpin) != NULL)
+			printf("%d: %s", i++, line);
+	
+		fclose(fpin);
 		break;
 	}
+	
 	printf("spike_pipe:  PARENT: spike test finished\n");
 	return;
 }
