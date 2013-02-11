@@ -196,7 +196,7 @@ void spike_pipe()
 		close(pipefds[1]);
 		in_out = fdopen(pipefds[0], "r");
 		wait(&status);
-		fgets(buf, in_out);
+		fgets(buf, 10, in_out);
 		printf("spike_pipe: printing contents...\n\tcontents: %s\n",
 			buf);
 
