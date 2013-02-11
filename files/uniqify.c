@@ -57,12 +57,17 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <pipe.h>
 // more includes...
 
 // functions go here:
 void parser();
 void rmdup();
+
+// spikes go here:
 void spike_fork();
+void spike_pipe();
 
 // test functions go here:
 void run_tests();
@@ -148,6 +153,47 @@ void spike_fork(int n)
 		exit(EXIT_FAILURE);
 	}
 	
+}
+
+void spike_pipe()
+{
+	int result;
+	int status;
+	
+	int pipefds[2];
+	if(pipe(pipefds) != 0){
+		perror("Pipes are screwed up, call a plumber");
+		exit(-1);
+	}
+	
+	switch((result = fork())){
+
+	case -1:
+		//in parent, oops
+		printf("spike_fork:  PARENT: forking error\n");
+		perror("Forking failed");
+		exit(EXIT_FAILURE);
+		break;
+	case 0:
+		//child case
+
+		close(pipefds[0]);
+		FILE *output = fdopen(pipefds[1], "w");
+		fputs(buf, 10, output);
+	
+		break;
+	default:
+		//parent case -- result holds pid of child
+
+		close(pipefds[1]);
+		FILE *input = fdopen(pipefds[0], "r");
+		wait(&status);
+		fgets(buf, 10, input);
+
+		break;
+	}
+	
+	return 0;
 }
 
 
