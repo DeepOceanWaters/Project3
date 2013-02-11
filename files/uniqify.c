@@ -166,6 +166,10 @@ void spike_fork()
 				": writing to pipe\n", colors[i], i);
 			in_out = fdopen(pipefds[1], "w");
 			fputs(colors[i], in_out);
+			fgets(buf, 10, in_out);
+			printf("spike_fork: %sCHILD[%d]" RESET_DA_COLOR 
+				": buf is: %s\n", colors[i], i, buf);
+			
 			close(pipefds[1]);
 			printf("spike_fork: %sCHILD[%d]"
 				RESET_DA_COLOR ": exiting\n", colors[i], i);
