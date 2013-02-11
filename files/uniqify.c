@@ -185,12 +185,12 @@ void spike_fork()
 		in_out = fdopen(pipefds[0], "r");
 		fgets(buf, 10, in_out);
 		for(i = 0; i < 6; i++)
-			if(colors[i] == blah)
+			if(colors[i] == buf)
 				break;
 		if(i > 5)
 			i = 0
 		printf("%sCHILD[%d]"" finished...\n" RESET_DA_COLOR,
-			colors[i], i);
+				colors[i], i);
 	}
 	printf("spike_fork: finished\n");
 	if(errno != ECHILD) {
