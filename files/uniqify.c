@@ -189,6 +189,10 @@ void spike_fork()
 				break;
 		if(i > 5)
 			i = 0;
+		if(buf == NULL)
+			i = 4;
+		else
+			printf("buf is unkown\n");
 		printf("%sCHILD[%d]"" finished...\n" RESET_DA_COLOR,
 				colors[i], i);
 		fclose(in_out);
