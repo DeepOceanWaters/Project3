@@ -98,8 +98,8 @@ int main(int argc, char *argv[])
 	//rmdup();
 	
 	// testing
-	//spike_fork();
-	spike_pipe();
+	spike_fork();
+	//spike_pipe();
 	return 0;
 }
 
@@ -131,13 +131,13 @@ void spike_fork()
 	int status;
 	int i;
 	int child_pid;
+	char buf[MAXLINE];
 	
 	char *colors[6] = { SET_RED, SET_GREEN, SET_YELLOW, SET_BLUE,
 		SET_MAGENTA, SET_CYAN };
-	
-	char *buf;
-	char inbuf[] = "what what what!";
-	FILE *in_out;
+		
+	FILE *input;
+	FILE *output;
 	
 	int pipefds[2];
 	
@@ -166,16 +166,15 @@ void spike_fork()
 			close(pipefds[0]);
 			printf("spike_fork: %sCHILD[%d]" RESET_DA_COLOR 
 				": writing to pipe\n", colors[i], i);
-			in_out = fdopen(pipefds[1], "w");
-			fputs(inbuf, in_out);
-			fgets(buf, 10, in_out);
-			printf("spike_fork: %sCHILD[%d]" RESET_DA_COLOR 
-				": buf is: %s\n", colors[i], i, buf);
+			input = fdopen(pipefds[1], "w");
+			fputs(colors[i], input);
+			fputs("\n", input);
+			printf("spike_fork: %sCHILD[%d]" RESET_DA_COLOR "\n",
+				colors[i], i);
 			
-			close(pipefds[1]);
 			printf("spike_fork: %sCHILD[%d]"
 				RESET_DA_COLOR ": exiting\n", colors[i], i);
-			fclose(in_out);
+			fclose(input);
 			_exit(0);
 			break;
 		default:
@@ -184,25 +183,15 @@ void spike_fork()
 			break;
 		}
 	}
-	buf = (char *) malloc(10 * sizeof(char));
+	
 	close(pipefds[1]);
 	// probably won't work the way I want it to, i.e. fdopen truncates
 	while((child_pid = wait(&status)) != -1) {
-		in_out = fdopen(pipefds[0], "r");
-		fgets(buf, 5, in_out);
+		output = fdopen(pipefds[0], "r");
+		fgets(buf, MAXLINE, output);
 		
-		for(i = 0; i < 6; i++)
-			if(colors[i] == buf)
-				break;
-		if(i > 5)
-			i = 0;
-		if(buf == NULL)
-			i = 4;
-		else
-			printf("buf is unkown\n");
-		printf("%sCHILD[%d] finished..." RESET_DA_COLOR "\n",
-				colors[i], i);
-		fclose(in_out);
+		printf("%sCHILD[%d] finished..." RESET_DA_COLOR "\n", buf, i);
+		fclose(output);
 	}
 	printf("spike_fork: finished\n");
 	if(errno != ECHILD) {
@@ -231,7 +220,7 @@ void spike_pipe()
 		fpout = fdopen(fd[1], "w");
 	
 		for(i = 0; i < 10; i++)
-			fprintf(fpout, "%s\n", "jeronimooo...");
+			fputs(fpout, "jeronimooo...");
 	
 		fclose(fpout);
 		_exit(EXIT_SUCCESS);
