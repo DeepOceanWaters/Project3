@@ -286,6 +286,7 @@ void spike_psrt()
 			break;
 		case  0:
 			// child case
+			dup2(pfd[1], STDOUT_FILENO);
 			close(pfd[1]);
 			dup2(pfd[0], STDIN_FILENO);
 			close(pfd[0]);
