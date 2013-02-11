@@ -186,14 +186,9 @@ void spike_fork()
 	// probably won't work the way I want it to, i.e. fdopen truncates
 	while((child_pid = wait(&status)) != -1) {
 		fgets(buf, MAXLINE, output);
-		for(i = 0; i < 6; i++)
-			if(!strcmp(colors[i], buf))
-				break;
-		if(i > 6)
-			i = 3;
 		printf("%sCHILD[] finished..." RESET_DA_COLOR "\n", buf);
-		fclose(output);
 	}
+	fclose(output);
 	printf("spike_fork: finished\n");
 	if(errno != ECHILD) {
 		perror("Error with child");
