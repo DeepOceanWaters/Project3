@@ -58,7 +58,6 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <pipe.h>
 // more includes...
 
 // functions go here:
@@ -90,6 +89,7 @@ int main(int argc, char *argv[])
 	
 	// testing
 	spike_fork(10);
+	spike_pipe();
 	return 0;
 }
 
@@ -121,6 +121,8 @@ void spike_fork(int n)
 	int status;
 	int i;
 	int child_pid;
+	
+	printf("spike_fork: starting spike test\n");
 	
 	for(i = 0; i < n; i++) {
 		printf("\nspike_fork: PARENT: forking once\n");
@@ -162,6 +164,8 @@ void spike_pipe()
 	char buf[10];
 	
 	int pipefds[2];
+	
+	printf("spike_pipe: starting spike test\n");
 	if(pipe(pipefds) != 0){
 		perror("Pipes are screwed up, call a plumber");
 		exit(-1);
@@ -171,17 +175,19 @@ void spike_pipe()
 
 	case -1:
 		//in parent, oops
-		printf("spike_fork:  PARENT: forking error\n");
+		printf("spike_pipe:  PARENT: forking error\n");
 		perror("Forking failed");
 		exit(EXIT_FAILURE);
 		break;
 	case 0:
 		//child case
-
+		printf("spike_pipe:   CHILD: closing one end of pipe\n");
 		close(pipefds[0]);
+		printf("spike_pipe:   CHILD: writing to pipe\n");
+		buf = "tenlinesyo";
 		FILE *output = fdopen(pipefds[1], "w");
 		fputs(buf, 10, output);
-	
+		_exit(EXIT_SUCCESS);
 		break;
 	default:
 		//parent case -- result holds pid of child
@@ -190,10 +196,12 @@ void spike_pipe()
 		FILE *input = fdopen(pipefds[0], "r");
 		wait(&status);
 		fgets(buf, 10, input);
+		printf("spike_pipe: printing contents...\n\tcontents: %s\n",
+			buf);
 
 		break;
 	}
-	
+	printf("spike_pipe:  PARENT: spike test finished\n");
 	return;
 }
 
