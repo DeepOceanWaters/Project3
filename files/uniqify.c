@@ -134,10 +134,22 @@ void spike_fork()
 	char *colors[6] = { SET_RED, SET_GREEN, SET_YELLOW, SET_BLUE,
 		SET_MAGENTA, SET_CYAN };
 	
+	char *buf;
+	FILE *in_out;
+	
+	int pipefds[2];
+	
+	printf("spike_fork: starting spike test\n");
+	if(pipe(pipefds) != 0){
+		perror("Pipes are screwed up, call a plumber");
+		exit(-1);
+	}
+	
 	printf("spike_fork: starting spike test\n");
 	
 	for(i = 0; i < 6; i++) {
-		printf("\nspike_fork: PARENT: forking once\n");
+		printf("\nspike_fork: PARENT: creating %sCHILD[%d]" 
+			RESET_DA_COLOR "\n", colors[i], i);
 		
 		switch((result = fork())){
 	
@@ -149,20 +161,38 @@ void spike_fork()
 			break;
 		case 0:
 			//child case
-		
+			close(pipefds[0]);
+			printf("spike_fork: %sCHILD[%d]: writing to pipe\n",
+				colors[i], i);
+			in_out = fdopen(pipefds[1], "w");
+			fputs(colors[i], in_out);
+			close(pipefds[1]);
 			printf("spike_fork: %sCHILD[%d]"
-				RESET_DA_COLOR ": closing.\n", i, colors[i]);
+				RESET_DA_COLOR ": exiting\n", colors[i], i);
+			
 			_exit(0);
 			break;
 		default:
 			//parent case -- result holds pid of child
+			
 			break;
 		}
 	}
-	
-	while((child_pid = wait(&status) != -1))
-		printf("...\n");
-	printf("spike_fork: finished waiting for children?\n");
+	buf = (char *) malloc(10 * sizeof(char));
+	close(pipefds[1]);
+	// probably won't work the way I want it to, i.e. fdopen truncates
+	while((child_pid = wait(&status)) != -1) {
+		in_out = fdopen(pipefds[0], "r");
+		fgets(buf, 10, in_out);
+		for(i = 0; i < 6; i++)
+			if(colors[i] == blah)
+				break;
+		if(i > 5)
+			i = 0
+		printf("%sCHILD[%d]"" finished...\n" RESET_DA_COLOR,
+			colors[i], i);
+	}
+	printf("spike_fork: finished\n");
 	if(errno != ECHILD) {
 		perror("Error with child");
 		exit(EXIT_FAILURE);
