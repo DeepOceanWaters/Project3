@@ -162,14 +162,14 @@ void spike_fork()
 		case 0:
 			//child case
 			close(pipefds[0]);
-			printf("spike_fork: %sCHILD[%d]: writing to pipe\n",
-				colors[i], i);
+			printf("spike_fork: %sCHILD[%d]" RESET_DA_COLOR 
+				": writing to pipe\n", colors[i], i);
 			in_out = fdopen(pipefds[1], "w");
 			fputs(colors[i], in_out);
 			close(pipefds[1]);
 			printf("spike_fork: %sCHILD[%d]"
 				RESET_DA_COLOR ": exiting\n", colors[i], i);
-			
+			fclose(in_out);
 			_exit(0);
 			break;
 		default:
@@ -188,9 +188,10 @@ void spike_fork()
 			if(colors[i] == buf)
 				break;
 		if(i > 5)
-			i = 0
+			i = 0;
 		printf("%sCHILD[%d]"" finished...\n" RESET_DA_COLOR,
 				colors[i], i);
+		fclose(in_out);
 	}
 	printf("spike_fork: finished\n");
 	if(errno != ECHILD) {
