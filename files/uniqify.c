@@ -78,6 +78,7 @@ void rmdup();
 void spike_fork();
 void spike_pipe();
 void spike_sort();
+void spike_psrt();
 
 // test functions go here:
 void run_tests();
@@ -101,7 +102,8 @@ int main(int argc, char *argv[])
 	// testing
 	//spike_fork();
 	//spike_pipe();
-	spike_sort();
+	//spike_sort();
+	spike_psrt();
 	return 0;
 }
 
@@ -262,6 +264,47 @@ void spike_sort()
 	return;
 }
 
+void spike_psrt()
+{
+	int pfd[2];
+	FILE *fpout;
+	
+	int result;
+	
+	char *sort_this[] = { "ant\n", "beegle\n", "zanzibar\n", "moo\n",
+		"cow\n", "nope\n", "hit\n", "pork\n" };
+	
+	pipe(pfd);
+	
+	for(i = 0; i < 5, i++) {
+		switch((result = fork())) {
+		case -1:
+			// parent effed up yo
+			perror("oh no");
+			exit(EXIT_FAILURE);
+			break;
+		case  0:
+			// child case
+			close(pfd[1]);
+			dup2(pfd[0], STDIN_FILENO);
+			close(pfd[0]);
+			execlp("sort", "sort",  (char*) NULL);
+			_exit(EXIT_FAILURE);
+			break;
+		default:
+			// parent
+			break;
+		}
+	}
+	close(pfd[0]);
+	for(i = 0; i < 8; i++) {
+		fpout = fdopen(pfd[1]);
+		fputs(sort_this[i], fpout);
+		fclose(fpout);
+	}
+	
+	return;
+}
 // Tests
 
 void run_tests()
