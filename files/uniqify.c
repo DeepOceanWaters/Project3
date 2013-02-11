@@ -182,9 +182,9 @@ void spike_fork()
 	}
 	
 	close(pipefds[1]);
+	output = fdopen(pipefds[0], "r");
 	// probably won't work the way I want it to, i.e. fdopen truncates
 	while((child_pid = wait(&status)) != -1) {
-		output = fdopen(pipefds[0], "r");
 		fgets(buf, MAXLINE, output);
 		for(i = 0; i < 6; i++)
 			if(!strcmp(colors[i], buf))
@@ -221,7 +221,7 @@ void spike_pipe()
 		fpout = fdopen(fd[1], "w");
 	
 		for(i = 0; i < 10; i++)
-			fputs(fpout, "jeronimooo...");
+			fputs("jeronimooo...", fpout);
 	
 		fclose(fpout);
 		_exit(EXIT_SUCCESS);
