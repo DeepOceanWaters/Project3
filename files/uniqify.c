@@ -60,6 +60,15 @@
 #include <unistd.h>
 // more includes...
 
+// defines...
+#define SET_RED     "\x1b[31m"
+#define SET_GREEN   "\x1b[32m"
+#define SET_YELLOW  "\x1b[33m"
+#define SET_BLUE    "\x1b[34m"
+#define SET_MAGENTA "\x1b[35m"
+#define SET_CYAN    "\x1b[36m"
+#define RESET_DA_COLOR   "\x1b[0m"
+
 // functions go here:
 void parser();
 void rmdup();
@@ -88,7 +97,7 @@ int main(int argc, char *argv[])
 	//rmdup();
 	
 	// testing
-	spike_fork(10);
+	spike_fork();
 	spike_pipe();
 	return 0;
 }
@@ -115,16 +124,19 @@ void rmdup()
 
 // Spikes
 
-void spike_fork(int n)
+void spike_fork()
 {
 	int result;
 	int status;
 	int i;
 	int child_pid;
 	
+	char *colors[6] = { SET_RED, SET_GREEN, SET_YELLOW, SET_BLUE,
+		SET_MAGENTA, SET_CYAN };
+	
 	printf("spike_fork: starting spike test\n");
 	
-	for(i = 0; i < n; i++) {
+	for(i = 0; i < 6; i++) {
 		printf("\nspike_fork: PARENT: forking once\n");
 		
 		switch((result = fork())){
@@ -138,7 +150,8 @@ void spike_fork(int n)
 		case 0:
 			//child case
 		
-			printf("spike_fork: CHILD[%d]: closing.\n", i);
+			printf("spike_fork: " colors[i] "CHILD[%d]"
+				RESET_DA_COLOR ": closing.\n", i);
 			_exit(0);
 			break;
 		default:
@@ -163,6 +176,8 @@ void spike_pipe()
 	int status;
 	char *buf;
 	FILE *in_out;
+	
+	buf = (char *) malloc(10 * sizeof(char));
 	
 	int pipefds[2];
 	
