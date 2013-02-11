@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	//rmdup();
 	
 	// testing
-	spike_fork();
+	//spike_fork();
 	spike_pipe();
 	return 0;
 }
@@ -135,6 +135,7 @@ void spike_fork()
 		SET_MAGENTA, SET_CYAN };
 	
 	char *buf;
+	char inbuf[] = "what what what!";
 	FILE *in_out;
 	
 	int pipefds[2];
@@ -165,7 +166,7 @@ void spike_fork()
 			printf("spike_fork: %sCHILD[%d]" RESET_DA_COLOR 
 				": writing to pipe\n", colors[i], i);
 			in_out = fdopen(pipefds[1], "w");
-			fputs(colors[i], in_out);
+			fputs(inbuf, in_out);
 			fgets(buf, 10, in_out);
 			printf("spike_fork: %sCHILD[%d]" RESET_DA_COLOR 
 				": buf is: %s\n", colors[i], i, buf);
@@ -243,14 +244,15 @@ void spike_pipe()
 		buf = "tenlinesyo";
 		in_out = fdopen(pipefds[1], "w");
 		fputs(buf, in_out);
+		close(pipefds[1]);
 		_exit(EXIT_SUCCESS);
 		break;
 	default:
 		//parent case -- result holds pid of child
 
 		close(pipefds[1]);
-		in_out = fdopen(pipefds[0], "r");
 		wait(&status);
+		in_out = fdopen(pipefds[0], "r");
 		fgets(buf, 10, in_out);
 		printf("spike_pipe: printing contents...\n\tcontents: %s\n",
 			buf);
