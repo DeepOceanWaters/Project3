@@ -241,10 +241,11 @@ void spike_pipe()
 		printf("spike_pipe:   CHILD: closing one end of pipe\n");
 		close(pipefds[0]);
 		printf("spike_pipe:   CHILD: writing to pipe\n");
-		buf = "tenlinesyo";
+		buf = "tenthline\0";
 		in_out = fdopen(pipefds[1], "w");
 		fputs(buf, in_out);
 		close(pipefds[1]);
+		fclose(in_out);
 		_exit(EXIT_SUCCESS);
 		break;
 	default:
