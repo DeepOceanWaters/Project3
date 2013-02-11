@@ -272,7 +272,7 @@ void spike_psrt()
 	
 	int result;
 	int i;
-	
+	char buf[MAXLINE];
 	char *colors[6] = { SET_RED, SET_GREEN, SET_YELLOW, SET_BLUE,
 		SET_MAGENTA, SET_CYAN };
 	
@@ -292,7 +292,7 @@ void spike_psrt()
 			// child case
 			close(pfd[0]);
 			fpin = fdopen(pfd[1], "r");
-			while(fgets(buf, MAXLINE, output) != NULL)
+			while(fgets(buf, MAXLINE, fpin) != NULL)
 				printf("%sCHILD[%d]: read: %s " RESET_DA_COLOR 
 					"\n", colors[i], i, buf);
 			fclose(fpin);
