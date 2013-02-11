@@ -268,16 +268,20 @@ void spike_psrt()
 {
 	int pfd[2];
 	FILE *fpout;
+	FILE *fpin;
 	
 	int result;
 	int i;
+	
+	char *colors[6] = { SET_RED, SET_GREEN, SET_YELLOW, SET_BLUE,
+		SET_MAGENTA, SET_CYAN };
 	
 	char *sort_this[] = { "ant\n", "beegle\n", "zanzibar\n", "moo\n",
 		"cow\n", "nope\n", "hit\n", "pork\n" };
 	
 	pipe(pfd);
 	
-	for(i = 0; i < 5; i++) {
+	for(i = 0; i < 6; i++) {
 		switch((result = fork())) {
 		case -1:
 			// parent effed up yo
@@ -286,11 +290,13 @@ void spike_psrt()
 			break;
 		case  0:
 			// child case
-			dup2(pfd[1], STDOUT_FILENO);
-			close(pfd[1]);
-			dup2(pfd[0], STDIN_FILENO);
 			close(pfd[0]);
-			execlp("sort", "sort",  (char*) NULL);
+			fpin = fdopen(pfd[1], "r");
+			while(fgets(buf, MAXLINE, output) != NULL)
+				printf("%sCHILD[%d]: read: %s " RESET_DA_COLOR 
+					"\n", colors[i], i, buf);
+			fclose(fpin);
+			//execlp("sort", "sort",  (char*) NULL);
 			_exit(EXIT_FAILURE);
 			break;
 		default:
