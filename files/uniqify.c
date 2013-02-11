@@ -248,7 +248,7 @@ void spike_sort()
 	
 	pipe(pfd);
 	
-	fpout = fdopen(pfd[1]);
+	fpout = fdopen(pfd[1], "w");
 	fputs(sort_this, fpout);
 	fclose(fpout);
 	
@@ -257,7 +257,7 @@ void spike_sort()
 	dup2(pfd[1], STDOUT_FILENO);
 	close(pfd[1]);
 	
-	execve("/bin/sort", NULL, NULL);
+	execlp("sort");
 	
 	return;
 }
