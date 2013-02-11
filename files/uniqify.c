@@ -154,7 +154,7 @@ void spike_fork(int n)
 		perror("Error with child");
 		exit(EXIT_FAILURE);
 	}
-	
+	return;
 }
 
 void spike_pipe()
@@ -162,6 +162,7 @@ void spike_pipe()
 	int result;
 	int status;
 	char buf[10];
+	FILE *in_out;
 	
 	int pipefds[2];
 	
@@ -184,18 +185,18 @@ void spike_pipe()
 		printf("spike_pipe:   CHILD: closing one end of pipe\n");
 		close(pipefds[0]);
 		printf("spike_pipe:   CHILD: writing to pipe\n");
-		buf = "tenlinesyo";
-		FILE *output = fdopen(pipefds[1], "w");
-		fputs(buf, 10, output);
+		buf = *"tenlinesyo";
+		in_out = fdopen(pipefds[1], "w");
+		fputs(buf, 10, in_out);
 		_exit(EXIT_SUCCESS);
 		break;
 	default:
 		//parent case -- result holds pid of child
 
 		close(pipefds[1]);
-		FILE *input = fdopen(pipefds[0], "r");
+		in_out = fdopen(pipefds[0], "r");
 		wait(&status);
-		fgets(buf, 10, input);
+		fgets(buf, 10, in_out);
 		printf("spike_pipe: printing contents...\n\tcontents: %s\n",
 			buf);
 
