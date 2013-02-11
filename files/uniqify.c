@@ -150,8 +150,8 @@ void spike_fork()
 		case 0:
 			//child case
 		
-			printf("spike_fork: " colors[i] "CHILD[%d]"
-				RESET_DA_COLOR ": closing.\n", i);
+			printf("spike_fork: %sCHILD[%d]"
+				RESET_DA_COLOR ": closing.\n", i, colors[i]);
 			_exit(0);
 			break;
 		default:
