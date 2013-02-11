@@ -159,6 +159,7 @@ void spike_pipe()
 {
 	int result;
 	int status;
+	char buf[10];
 	
 	int pipefds[2];
 	if(pipe(pipefds) != 0){
@@ -193,7 +194,7 @@ void spike_pipe()
 		break;
 	}
 	
-	return 0;
+	return;
 }
 
 
