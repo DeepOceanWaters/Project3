@@ -178,15 +178,13 @@ void spike_fork()
 			break;
 		}
 	}
-	buf = (char *) malloc(5 * sizeof(char));
+	buf = (char *) malloc(10 * sizeof(char));
 	close(pipefds[1]);
 	// probably won't work the way I want it to, i.e. fdopen truncates
 	while((child_pid = wait(&status)) != -1) {
 		in_out = fdopen(pipefds[0], "r");
-		if(!strcmp(fgets(buf, 5, in_out), "s")) {
-			perror("fgets");
-			exit(EXIT_FAILURE);
-		}
+		fgets(buf, 5, in_out);
+		
 		for(i = 0; i < 6; i++)
 			if(colors[i] == buf)
 				break;
@@ -196,7 +194,7 @@ void spike_fork()
 			i = 4;
 		else
 			printf("buf is unkown\n");
-		printf("%sCHILD[%d]"" finished...\n" RESET_DA_COLOR,
+		printf("%sCHILD[%d] finished..." RESET_DA_COLOR "\n",
 				colors[i], i);
 		fclose(in_out);
 	}
