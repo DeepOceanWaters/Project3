@@ -161,7 +161,7 @@ void spike_pipe()
 {
 	int result;
 	int status;
-	char buf[10];
+	char *buf;
 	FILE *in_out;
 	
 	int pipefds[2];
@@ -185,7 +185,7 @@ void spike_pipe()
 		printf("spike_pipe:   CHILD: closing one end of pipe\n");
 		close(pipefds[0]);
 		printf("spike_pipe:   CHILD: writing to pipe\n");
-		buf = *"tenlinesyo";
+		buf = "tenlinesyo";
 		in_out = fdopen(pipefds[1], "w");
 		fputs(buf, in_out);
 		_exit(EXIT_SUCCESS);
