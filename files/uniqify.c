@@ -298,11 +298,10 @@ void spike_psrt()
 		}
 	}
 	close(pfd[0]);
-	for(i = 0; i < 8; i++) {
-		fpout = fdopen(pfd[1], "w");
+	fpout = fdopen(pfd[1], "w");
+	for(i = 0; i < 8; i++)
 		fputs(sort_this[i], fpout);
-		fclose(fpout);
-	}
+	fclose(fpout);
 	
 	return;
 }
