@@ -77,6 +77,7 @@ void rmdup();
 // spikes go here:
 void spike_fork();
 void spike_pipe();
+void spike_sort();
 
 // test functions go here:
 void run_tests();
@@ -98,8 +99,9 @@ int main(int argc, char *argv[])
 	//rmdup();
 	
 	// testing
-	spike_fork();
+	//spike_fork();
 	//spike_pipe();
+	spike_sort();
 	return 0;
 }
 
@@ -205,6 +207,7 @@ void spike_pipe()
 	int result;
 	int fd[2];
 	int i;
+	int status;
 
 	pipe(fd);
 
@@ -225,7 +228,7 @@ void spike_pipe()
 		close(fd[1]);
 	
 		fpin = fdopen(fd[0], "r");
-	
+		wait(&status);
 		while(fgets(line, MAXLINE, fpin) != NULL)
 			printf("%d: %s", i++, line);
 	
@@ -237,6 +240,27 @@ void spike_pipe()
 	return;
 }
 
+void spike_sort()
+{
+	int pfd[2];
+	FILE *fpout;
+	char sort_this[] = "ant\nbeegle\nzanzibar\nmoo\ncow\nnope\nhit\npork";
+	
+	pipe(pfd);
+	
+	fpout = fdopen(pfd[1]);
+	fputs(sort_this, fpout);
+	fclose(fpout);
+	
+	dup2(pfd[0], STDIN_FILENO);
+	close(pfd[0]);
+	dup2(pfd[1], STDOUT_FILENO);
+	close(pfd[1]);
+	
+	execve("/bin/sort", NULL, NULL);
+	
+	return;
+}
 
 // Tests
 
