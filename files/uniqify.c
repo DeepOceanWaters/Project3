@@ -147,7 +147,7 @@ void spike_fork()
 	
 	printf("spike_fork: starting spike test\n");
 	
-	for(i = 0; i < 6; i++) {
+	for(i = 0; i < 1; i++) {
 		printf("\nspike_fork: PARENT: creating %sCHILD[%d]" 
 			RESET_DA_COLOR "\n", colors[i], i);
 		
@@ -178,12 +178,15 @@ void spike_fork()
 			break;
 		}
 	}
-	buf = (char *) malloc(10 * sizeof(char));
+	buf = (char *) malloc(5 * sizeof(char));
 	close(pipefds[1]);
 	// probably won't work the way I want it to, i.e. fdopen truncates
 	while((child_pid = wait(&status)) != -1) {
 		in_out = fdopen(pipefds[0], "r");
-		fgets(buf, 10, in_out);
+		if(!strcmp(fgets(buf, 5, in_out), "s")) {
+			perror("fgets");
+			exit(EXIT_FAILURE);
+		}
 		for(i = 0; i < 6; i++)
 			if(colors[i] == buf)
 				break;
