@@ -187,7 +187,7 @@ void spike_pipe()
 		printf("spike_pipe:   CHILD: writing to pipe\n");
 		buf = *"tenlinesyo";
 		in_out = fdopen(pipefds[1], "w");
-		fputs(buf, 10, in_out);
+		fputs(buf, in_out);
 		_exit(EXIT_SUCCESS);
 		break;
 	default:
@@ -196,7 +196,7 @@ void spike_pipe()
 		close(pipefds[1]);
 		in_out = fdopen(pipefds[0], "r");
 		wait(&status);
-		fgets(buf, 10, in_out);
+		fgets(buf, in_out);
 		printf("spike_pipe: printing contents...\n\tcontents: %s\n",
 			buf);
 
