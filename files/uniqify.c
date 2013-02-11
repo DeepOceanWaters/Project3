@@ -270,13 +270,14 @@ void spike_psrt()
 	FILE *fpout;
 	
 	int result;
+	int i;
 	
 	char *sort_this[] = { "ant\n", "beegle\n", "zanzibar\n", "moo\n",
 		"cow\n", "nope\n", "hit\n", "pork\n" };
 	
 	pipe(pfd);
 	
-	for(i = 0; i < 5, i++) {
+	for(i = 0; i < 5; i++) {
 		switch((result = fork())) {
 		case -1:
 			// parent effed up yo
@@ -298,7 +299,7 @@ void spike_psrt()
 	}
 	close(pfd[0]);
 	for(i = 0; i < 8; i++) {
-		fpout = fdopen(pfd[1]);
+		fpout = fdopen(pfd[1], "w");
 		fputs(sort_this[i], fpout);
 		fclose(fpout);
 	}
