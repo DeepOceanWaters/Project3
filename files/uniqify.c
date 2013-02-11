@@ -243,7 +243,10 @@ void spike_pipe()
 		printf("spike_pipe:   CHILD: writing to pipe\n");
 		buf = "tenthline\0";
 		in_out = fdopen(pipefds[1], "w");
-		fputs(buf, in_out);
+		if(fputs(buf, in_out) != 's'){
+			perror("fputs");
+			_exit(EXIT_FAILURE);
+		}
 		close(pipefds[1]);
 		fclose(in_out);
 		_exit(EXIT_SUCCESS);
