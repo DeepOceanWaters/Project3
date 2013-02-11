@@ -257,7 +257,7 @@ void spike_sort()
 	dup2(pfd[1], STDOUT_FILENO);
 	close(pfd[1]);
 	
-	execlp("sort");
+	execlp("sort", "sort", (char *) NULL);
 	
 	return;
 }
