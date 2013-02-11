@@ -149,7 +149,7 @@ void spike_fork()
 	
 	printf("spike_fork: starting spike test\n");
 	
-	for(i = 0; i < 1; i++) {
+	for(i = 0; i < 6; i++) {
 		printf("\nspike_fork: PARENT: creating %sCHILD[%d]" 
 			RESET_DA_COLOR "\n", colors[i], i);
 		
@@ -169,9 +169,6 @@ void spike_fork()
 			input = fdopen(pipefds[1], "w");
 			fputs(colors[i], input);
 			fputs("\n", input);
-			printf("spike_fork: %sCHILD[%d]" RESET_DA_COLOR "\n",
-				colors[i], i);
-			
 			printf("spike_fork: %sCHILD[%d]"
 				RESET_DA_COLOR ": exiting\n", colors[i], i);
 			fclose(input);
@@ -189,8 +186,12 @@ void spike_fork()
 	while((child_pid = wait(&status)) != -1) {
 		output = fdopen(pipefds[0], "r");
 		fgets(buf, MAXLINE, output);
-		
-		printf("%sCHILD[%d] finished..." RESET_DA_COLOR "\n", buf, i);
+		for(i = 0; i < 6; i++)
+			if(!strcmp(colors[i], buf))
+				break;
+		if(i > 6)
+			i = 3;
+		printf("%sCHILD[] finished..." RESET_DA_COLOR "\n", buf);
 		fclose(output);
 	}
 	printf("spike_fork: finished\n");
