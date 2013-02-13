@@ -69,11 +69,15 @@
 #define SET_CYAN    	"\x1b[36m"
 #define RESET_DA_COLOR  "\x1b[0m"
 #define MAXLINE		512
+#define PARENT		1
+#define CHILD		0
 
 // functions go here:
+void init_pipes(int num_pipes, int *pfd[]);
 void parser();
 void rmdup();
 
+void puke_exit(char *msg, int type);
 // spikes go here:
 void spike_fork();
 void spike_pipe();
@@ -89,13 +93,32 @@ void run_tests();
 
 int main(int argc, char *argv[])
 {
-	int *pfd[]; // an array of pipe file descriptors
+	int *pfd[2]; // an array of pipe file descriptors
+	int i;
+	int num_pipes;
 	
-	init_pipes(argv[1], pfd);
-	// parse the .txt file
-	parser();
+	if(argc < 2) {
+		printf("uniqify: number of pipes is required.\n");
+		exit(EXIT_FAILURE);
+	}
+	if(argc > 2) {
+		printf("uniqify: too many arguments.\n");
+		exit(EXIT_FAILURE);
+	}
 	
-	// sort
+	num_pipes = atoi(argv[1]);
+	init_pipes(num_pipes, pfd);
+	
+	for(i = 0; i < num_pipes; i++) {
+		switch(fork()) {
+			case -1: puke_exit();
+			case  0: init_sort(pfd);
+			default: break;
+		}
+	}
+		
+	
+	parser(pfd, num_pipes);
 	
 	// remove duplicates
 	//rmdup();
@@ -103,9 +126,26 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void init_pipes(int num_pipes,int *pfd[])
+void init_pipes(int num_pipes, int *pfd[])
 {
+	int i;
 	
+	pfd = (int **) malloc(num_pipes * sizeof(int*));
+	
+	for(i = 0; i < num_pipes; i++)
+		if(pipe(pfd[i]) != 0) puke_exit("Pipes", PARENT);
+	
+	return;
+}
+
+void init_sort(int *pfd)
+{
+	dup2(pfd[0], STDIN_FILENO);
+	close(pfd[0]);
+	dup2(pfd[1], STDOUT_FILENO);
+	close(pfd[1]);
+	
+	execlp("sort", "sort", (char *) NULL);
 }
 /**
  * for now, just initializing the function
@@ -115,6 +155,7 @@ void parser()
 {
 	// parse stuff
 }
+
 
 /**
  * rmdup => remove duplicates
@@ -126,6 +167,33 @@ void rmdup()
 {
 	// removes duplicates from sorted list of wurds
 }
+
+/**
+ * Description:
+ *	Takes a message, and pukes & exits. If process type is unknown, puke
+ *	error and continue the process.
+ * char *msg:
+ *	The message usually passed to the function perror(), perror() is called
+ *	using msg.
+ * int type:
+ *	Used to determine how to exit. If type is the parent process => use
+ *	exit(), if the type is a child process => use _exit().
+ *	If type is not either PARENT or CHILD, puke_exit() does not exit and
+ *	continues with the process. This is done because calling exit() on the
+ *	wrong process could cause an unwanted outcome.
+**/
+void puke_exit(char *msg, int type)
+{
+	perror(msg);
+	if(type == PARENT)
+		exit(EXIT_FAILURE);
+	else if(type == CHILD)
+		_exit(EXIT_FAILURE);
+	else
+		printf("%s: unknown process type - continuing\n", msg);
+	return;
+}
+
 
 // Spikes
 
