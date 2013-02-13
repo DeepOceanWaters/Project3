@@ -74,15 +74,18 @@
 
 // functions go here:
 void init_pipes(int num_pipes, int *pfd[]);
+void init_sort(int *pfd);
 void parser();
 void rmdup();
 
 void puke_exit(char *msg, int type);
+
 // spikes go here:
 void spike_fork();
 void spike_pipe();
 void spike_sort();
 void spike_psrt();
+void spike_stdin();
 
 // test functions go here:
 void run_tests();
@@ -93,7 +96,7 @@ void run_tests();
 
 int main(int argc, char *argv[])
 {
-	int *pfd[2]; // an array of pipe file descriptors
+	/*int *pfd[2]; // an array of pipe file descriptors
 	int i;
 	int num_pipes;
 	
@@ -121,7 +124,9 @@ int main(int argc, char *argv[])
 	parser(pfd, num_pipes);
 	
 	// remove duplicates
-	//rmdup();
+	//rmdup();*/
+	
+	spike_stdin();
 	
 	return 0;
 }
@@ -394,13 +399,40 @@ void spike_stdin()
 	
 	int cnt_size;
 	
-	cnt_size = 0;
 	
-	while(fgets(buf, MAXLINE, stdin)) {
-		old = content;
+	switch((result = fork())) {
+	case -1:
+		// parent effed up yo
+		perror("oh no");
+		exit(EXIT_FAILURE);
+		break;
+	case  0:
+		// child case
+		dup2(pfd[0], STDIN_FILENO);
+		close(pfd[0]);
+		dup2(pfd[1], STDOUT_FILENO);
+		close(pfd[1]);
 		
-		
+		execlp("sort", "sort",  (char*) NULL);
+		_exit(EXIT_FAILURE);
+		break;
+	default:
+		// parent
+		break;
 	}
+	
+	cnt_size = 0;
+	fpout = fdopen(pfd[1], "w");
+		
+	while(fgets(buf, MAXLINE, stdin) != NULL)
+		fputs(buf, fpout);
+	fclose(fpout);
+	
+	printf("Done writing, sorting now...\n");
+	fpin = fdopen(pfd[0], "r");
+	while(fgets(buf MAXLINE, fpin) != NULL)
+		fputs(buf, stdout);
+	fclose(fpin);
 	
 	return;	
 }
