@@ -426,14 +426,14 @@ void spike_stdin()
 	cnt_size = 0;
 	fpout = fdopen(pfd[1], "w");
 		
-	while(fgets(buf, MAXLINE, stdin) != NULL)
+	while(fgets(buf, MAXLINE, stdin))
 		fputs(buf, fpout);
 	fclose(fpout);
 	
 	printf("Done writing, sorting now...\n");
 	fpin = fdopen(pfd[0], "r");
-	while(fgets(buf, MAXLINE, fpin) != NULL)
-		fputs(buf, stdout);
+	while(fgets(buf, MAXLINE, fpin))
+		fprintf("%s\n", buf);
 	fclose(fpin);
 	
 	return;	
