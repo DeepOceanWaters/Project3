@@ -398,7 +398,9 @@ void spike_stdin()
 	char *content;
 	
 	int cnt_size;
+	int result;
 	
+	pipe(pfd);
 	
 	switch((result = fork())) {
 	case -1:
@@ -430,7 +432,7 @@ void spike_stdin()
 	
 	printf("Done writing, sorting now...\n");
 	fpin = fdopen(pfd[0], "r");
-	while(fgets(buf MAXLINE, fpin) != NULL)
+	while(fgets(buf, MAXLINE, fpin) != NULL)
 		fputs(buf, stdout);
 	fclose(fpin);
 	
