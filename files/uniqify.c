@@ -389,6 +389,7 @@ void spike_psrt()
 void spike_stdin()
 {
 	int pfd[2];
+	int pfd2[2];
 	FILE *fpout;
 	FILE *fpin;
 	
@@ -401,6 +402,7 @@ void spike_stdin()
 	int result;
 	
 	pipe(pfd);
+	pipe(pfd2);
 	
 	switch((result = fork())) {
 	case -1:
@@ -412,8 +414,10 @@ void spike_stdin()
 		// child case
 		dup2(pfd[0], STDIN_FILENO);
 		close(pfd[0]);
-		dup2(pfd[1], STDOUT_FILENO);
+		dup2(pfd2[1], STDOUT_FILENO);
+		close(pfd2[1]);
 		close(pfd[1]);
+		close(pfd2[0]);
 		
 		execlp("sort", "sort",  (char*) NULL);
 		_exit(EXIT_FAILURE);
@@ -424,6 +428,8 @@ void spike_stdin()
 	}
 	
 	cnt_size = 0;
+	close(pfd[0]);
+	close(pfd2[1]);
 	fpout = fdopen(pfd[1], "w");
 		
 	while(fgets(buf, MAXLINE, stdin))
@@ -431,9 +437,9 @@ void spike_stdin()
 	fclose(fpout);
 	
 	printf("Done writing, sorting now...\n");
-	fpin = fdopen(pfd[0], "r");
+	fpin = fdopen(pfd2[0], "r");
 	while(fgets(buf, MAXLINE, fpin))
-		fprintf("%s\n", buf);
+		printf("%s\n", buf);
 	fclose(fpin);
 	
 	return;	
