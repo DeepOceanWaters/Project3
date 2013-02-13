@@ -89,24 +89,24 @@ void run_tests();
 
 int main(int argc, char *argv[])
 {
-	// fill with stuff
+	int *pfd[]; // an array of pipe file descriptors
 	
+	init_pipes(argv[1], pfd);
 	// parse the .txt file
-	//parser();
+	parser();
 	
 	// sort
 	
 	// remove duplicates
 	//rmdup();
 	
-	// testing
-	//spike_fork();
-	//spike_pipe();
-	//spike_sort();
-	spike_psrt();
 	return 0;
 }
 
+void init_pipes(int num_pipes,int *pfd[])
+{
+	
+}
 /**
  * for now, just initializing the function
  * will add args and return values when appropriate
@@ -292,9 +292,9 @@ void spike_psrt()
 			// child case
 			close(pfd[0]);
 			fpin = fdopen(pfd[1], "r");
-			while(fgets(buf, MAXLINE, fpin) != NULL)
-				printf("%sCHILD[%d]: read: %s " RESET_DA_COLOR 
-					"\n", colors[i], i, buf);
+			fgets(buf, MAXLINE, fpin);
+			printf("%sCHILD[%d]: read: %s " RESET_DA_COLOR 
+				"\n", colors[i], i, buf);
 			fclose(fpin);
 			//execlp("sort", "sort",  (char*) NULL);
 			_exit(EXIT_FAILURE);
@@ -311,6 +311,30 @@ void spike_psrt()
 	fclose(fpout);
 	
 	return;
+}
+
+void spike_stdin()
+{
+	int pfd[2];
+	FILE *fpout;
+	FILE *fpin;
+	
+	char buf[MAXLINE];
+	
+	char *old;
+	char *content;
+	
+	int cnt_size;
+	
+	cnt_size = 0;
+	
+	while(fgets(buf, MAXLINE, stdin)) {
+		old = content;
+		
+		
+	}
+	
+	return;	
 }
 // Tests
 
