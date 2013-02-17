@@ -75,8 +75,9 @@
 // functions go here:
 void init_pipes(int num_pipes, int *pfd[]);
 void init_sort(int *pfd);
-void parser();
-void rmdup();
+void parser(int *pfd, int num_pipes);
+FILE* merge_uniq(FILE *fpin, int cur, int max);
+FILE* mrg_two(FILE *fpin);
 
 void puke_exit(char *msg, int type);
 
@@ -96,9 +97,13 @@ void run_tests();
 
 int main(int argc, char *argv[])
 {
-	/*int *pfd[2]; // an array of pipe file descriptors
+	int *pfd[2]; // an array of pipe file descriptors for child-parent com
+	int *sfd[2]; // an array of pipe file descriptors for sort
 	int i;
 	int num_pipes;
+	FILE *fpin;
+	FILE *fpout;
+	char *buf[MAXLINE];
 	
 	if(argc < 2) {
 		printf("uniqify: number of pipes is required.\n");
@@ -109,24 +114,36 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	
+	// set timer
+	
 	num_pipes = atoi(argv[1]);
 	init_pipes(num_pipes, pfd);
+	init_pipes(num_pipes, sfd);
 	
 	for(i = 0; i < num_pipes; i++) {
 		switch(fork()) {
-			case -1: puke_exit();
-			case  0: init_sort(pfd);
-			default: break;
+			case -1:
+				puke_exit("Fork");
+				break;
+			case  0:
+				init_sort(pfd);
+				_exit(EXIT_FAILURE);
+				break;
+			default:
+				close(sfd[i][1]);
+				break;
 		}
 	}
-		
 	
 	parser(pfd, num_pipes);
 	
+	for(i = 0; i < num_pipes; i++)
+		fpin[i] = fdopen(pfd[i][0], "r"); // open each stream
 	// remove duplicates
-	//rmdup();*/
-	
-	spike_stdin();
+	fpout = merge_uniq(fpin);
+	while(fgets(buf, MAXLINE, fpout))
+		printf("%s", buf);
+	//spike_stdin();
 	
 	return 0;
 }
@@ -143,12 +160,15 @@ void init_pipes(int num_pipes, int *pfd[])
 	return;
 }
 
-void init_sort(int *pfd)
+void init_sort(int *pfd, int *sfd)
 {
 	dup2(pfd[0], STDIN_FILENO);
 	close(pfd[0]);
-	dup2(pfd[1], STDOUT_FILENO);
 	close(pfd[1]);
+	
+	dup2(sfd[1], STDOUT_FILENO);
+	close(sfd[1]);
+	close(sfd[0])
 	
 	execlp("sort", "sort", (char *) NULL);
 }
@@ -156,11 +176,91 @@ void init_sort(int *pfd)
  * for now, just initializing the function
  * will add args and return values when appropriate
 **/
-void parser()
+void parser(int *pfd, int num_pipes)
 {
 	// parse stuff
+	char buf[MAXLINE];
+	
+	int i;
+	int result;
+	
+	// need to parse stuff yo
+	
+	for(i = 0; i < num_pipes; i++)
+		fpout[i] = fdopen(pfd[i][1], "w"); // open each stream
+	
+	i = 0;
+	while(fgets(buf, MAXLINE, stdin)) {
+		// parse buf
+		i = i % num_pipes;
+		fputs(buf, fpout[i]);
+		i++;
+	}
+	
+	for(i = 0; i < num_pipes; i++)
+		fclose(fpout[i]);	// flush each stream
+	
+	return;
 }
 
+/**
+ * Description:
+ *	Merges the information, and uniqifies the words.
+ *
+**/
+FILE* merge_uniq(FILE *fpin, int cur, int max)
+{
+	if(cur == max)
+		return fpin[max];
+	FILE merger[2];
+	merger[0] = fpin[cur];
+	merger[1] = merge_uniq(fpin, cur + 1, max);
+	return mrg_two(merger);
+}
+
+FILE* mrg_two(FILE *fpin)
+{
+	char cur[MAXLINE];
+	char nxt[MAXLINE];
+	int cmp;
+	int pfd[2];
+	int x;
+	FILE new[2];
+	
+	if(!fgets(nxt, MAXLINE, fpin[0])) {
+		fclose(fpin[0]);
+		return fpin[1];
+	}
+	
+	if(pipe(pfd))
+		puke_exit("Piping", PARENT);
+	
+	new[0] = fdopen(pfd[0], "r");
+	new[1] = fdopen(pfd[1], "w");
+	
+	x = 1;
+	while(fgets(cur, MAXLINE, fpin[x])) {
+		cmp = strcmp(cur, nxt);
+		if(cmp < 0) {
+			fputs(cur, new[1]);
+		}
+		else {
+			fputs(nxt, new[1]);
+			strcpy(nxt, cur);
+			x = (x + 1) % 2;
+		}
+	}
+	
+	x = (x + 1) % 2;
+	fputs(nxt, new[1]);
+	while(fgets(cur, MAXLINE, fpin[x]))
+		fputs(cur, new[1]);
+	
+	fclose(fpin[0]);
+	fclose(fpin[1]);
+	fclose(new[1]);
+	return new[0];
+}
 
 /**
  * rmdup => remove duplicates
