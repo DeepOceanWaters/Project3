@@ -126,16 +126,23 @@ int main(int argc, char *argv[])
 	
 	for(i = 0; i < num_pipes; i++) {
 		switch(fork()) {
-			case -1: puke_exit("Fork", PARENT);
-			case  0: init_sort(pfd[i], sfd[i]);
-			default: close(sfd[i][1]);
+			case -1:
+				puke_exit("Fork", PARENT);
+				break;
+			case  0:
+				init_sort(pfd[i], sfd[i]);
+				break;
+			default:
+				close(sfd[i][1]);
+				close(pfd[i][0]);
+				break;
 		}
 	}
 	
 	parser(pfd, num_pipes);
 	
 	for(i = 0; i < num_pipes; i++)
-		fpin[i] = fdopen(pfd[i][0], "r"); // open each stream
+		fpin[i] = fdopen(sfd[i][0], "r"); // open each stream
 	
 	fpout = merge_uniq(fpin, 0, num_pipes - 1);
 	while(fgets(buf, MAXLINE, fpout))
