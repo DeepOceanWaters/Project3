@@ -187,15 +187,13 @@ void init_sort(int *pfd, int *sfd)
 	close(sfd[0]);
 	close(pfd[0]);
 	
-	printf("looping through shit yo\n");
-	while(fgets(buf, MAXLINE, stdin)) {
-		printf("CHILD IS PUTTING: %s", buf);
+	/*while(fgets(buf, MAXLINE, stdin)) {
 		fputs(buf, stdout);
 	}
 	fclose(stdin);
 	fclose(stdout);
-	printf("done sorting;;;;\n");
-	//execlp("sort", "sort", (char *) NULL);
+	printf("done sorting;;;;\n"); // */
+	execlp("sort", "sort", (char *) NULL);
 	_exit(EXIT_SUCCESS);
 }
 
