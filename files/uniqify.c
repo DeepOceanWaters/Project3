@@ -105,9 +105,6 @@ int main(int argc, char *argv[])
 	FILE *fpout;
 	char buf[MAXLINE];
 	
-	spike_stdin();
-	exit(0);
-	
 	if(argc < 2) {
 		printf("uniqify: number of pipes is required.\n");
 		exit(EXIT_FAILURE);
@@ -135,18 +132,19 @@ int main(int argc, char *argv[])
 			default:
 				close(sfd[i][1]);
 				close(pfd[i][0]);
+				fpin[i] = fdopen(sfd[i][0], "r");
 				break;
 		}
 	}
 	
-	for(i = 0; i < num_pipes; i++)
-		fpin[i] = fdopen(sfd[i][0], "r"); // open each stream
+	//for(i = 0; i < num_pipes; i++)
+	//	fpin[i] = fdopen(sfd[i][0], "r"); // open each stream
 	
 	parser(pfd, num_pipes);
 	
 	fpout = merge_uniq(fpin, 0, num_pipes - 1);
 	while(fgets(buf, MAXLINE, fpout))
-		printf("%s", buf);
+		printf("%s\n", buf);
 	
 	return 0;
 }
@@ -203,10 +201,11 @@ void parser(int **pfd, int num_pipes)
 	while(fgets(buf, MAXLINE, stdin)) {
 		// parse buf
 		i = i % num_pipes;
+		printf("  --- FGETS: buf=%s_i=%d ---  ", buf, i);
 		fputs(buf, fpout[i]);
 		i++;
 	}
-	
+	printf("\n\nGot out\n\n");
 	for(i = 0; i < num_pipes; i++)
 		fclose(fpout[i]);	// flush each stream
 	
