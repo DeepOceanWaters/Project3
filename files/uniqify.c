@@ -175,13 +175,16 @@ void init_sort(int *pfd, int *sfd)
 	char buf[MAXLINE];
 	int i = 0;
 	int result;
-	printf("dup2 pfd\n");
+	printf("dup2 pfd = %d\n", pfd[0]);
+	close(STDIN_FILENO);
 	if((result = dup2(pfd[0], STDIN_FILENO)) == -1)
 		puke_exit("WOW", CHILD);
-	printf("result = %d\n", result);
+	printf("result   = %d\n", result);
+	perror("dup2-pfd[0]");
 	
 	printf("dup2 sfd\n");
-	dup2(sfd[1], STDOUT_FILENO)
+	close(STDOUT_FILENO);
+	dup2(sfd[1], STDOUT_FILENO);
 		
 	close(sfd[1]);
 	close(pfd[1]);
