@@ -176,12 +176,13 @@ void init_sort(int *pfd, int *sfd)
 	int i = 0;
 	int result;
 	printf("dup2 pfd\n");
-	dup2(pfd[0], STDIN_FILENO);
+	if((result = dup2(pfd[0], STDIN_FILENO)) == -1)
+		puke_exit("WOW", CHILD);
+	printf("result = %d\n", result);
 	
 	printf("dup2 sfd\n");
-	if((result = dup2(sfd[1], STDOUT_FILENO)) == -1)
-		puke_exit("Fucking stdout sux dix", CHILD);
-	printf("result: %d\n", result);
+	dup2(sfd[1], STDOUT_FILENO)
+		
 	close(sfd[1]);
 	close(pfd[1]);
 	close(sfd[0]);
