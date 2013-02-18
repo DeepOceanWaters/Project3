@@ -234,8 +234,17 @@ void parser(int **pfd, int num_pipes)
 FILE* merge_uniq(FILE **fpin, int cur)
 {
 	printf("I'm merging but not really? cur=%d\n", cur);
-	if(cur == 0)
-		return fpin[0];
+	if(cur == 0) {
+		int pfd[2];
+		char buf[MAXLINE];
+		pipe(pfd);
+		FILE * pfile = fdopen(pfd[1], "w");
+		while(fgets(buf, MAXLINE, fpin[0]))
+			fputs(buf, pfile);
+		fclose(pfile);
+		fclose(fpin[0]);
+		return fdopen(pfd[0], "r");
+	}
 	printf("[BEFO]MERGIN AT: %d\n", cur);
 	FILE **merger;
 	merger = (FILE **) malloc(2 * sizeof(FILE *));
