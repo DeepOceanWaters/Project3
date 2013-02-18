@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
 				init_sort(pfd[i], sfd[i]);
 				break;
 			default:
+				break;
 		}
 	}
 	
@@ -178,9 +179,11 @@ void init_sort(int *pfd, int *sfd)
 	dup2(sfd[1], STDOUT_FILENO);
 	close(sfd[1]);
 	close(sfd[0]);
-	
-	while(fgets(buf, MAXLINE, stdin))
+	printf("looping through shit yo\n");
+	while(fgets(buf, MAXLINE, stdin)) {
+		printf("CHILD IS PUTTING: %s\n", buf);
 		fputs(buf, stdout);
+	}
 	fclose(stdin);
 	fclose(stdout);
 	printf("done sorting;;;;\n");
