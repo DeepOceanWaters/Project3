@@ -130,7 +130,6 @@ int main(int argc, char *argv[])
 				init_sort(pfd[i], sfd[i]);
 				break;
 			default:
-				break;
 		}
 	}
 	
@@ -171,6 +170,7 @@ int** init_pipes(int num_pipes)
 
 void init_sort(int *pfd, int *sfd)
 {
+	char buf[MAXLINE];
 	dup2(pfd[0], STDIN_FILENO);
 	close(pfd[0]);
 	close(pfd[1]);
@@ -179,7 +179,13 @@ void init_sort(int *pfd, int *sfd)
 	close(sfd[1]);
 	close(sfd[0]);
 	
-	execlp("sort", "sort", (char *) NULL);
+	while(fgets(buf, MAXLINE, stdin))
+		fputs(buf, stdout);
+	fclose(stdin);
+	fclose(stdout);
+	printf("done sorting;;;;\n");
+	//execlp("sort", "sort", (char *) NULL);
+	_exit(EXIT_SUCCESS);
 }
 
 /**
