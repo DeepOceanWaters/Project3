@@ -220,14 +220,15 @@ void parser(int **pfd, int num_pipes)
 **/
 FILE* merge_uniq(FILE **fpin, int cur, int max)
 {
+	printf("I'm merging but not really? cur=%d||max=%d\n", cur, max);
 	if(cur == max)
 		return fpin[max];
-	printf("[BEFO]MERGIN AT: %d/%d", cur, max);
+	printf("[BEFO]MERGIN AT: %d/%d\n", cur, max);
 	FILE **merger;
 	merger = (FILE **) malloc(2 * sizeof(FILE *));
 	merger[0] = fpin[cur];
 	merger[1] = merge_uniq(fpin, cur + 1, max);
-	printf("[AFTA]MERGIN AT: %d/%d", cur, max);
+	printf("[AFTA]MERGIN AT: %d/%d\n", cur, max);
 	return mrg_two(merger);
 }
 
