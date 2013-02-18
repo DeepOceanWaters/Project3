@@ -173,13 +173,22 @@ int** init_pipes(int num_pipes)
 void init_sort(int *pfd, int *sfd)
 {
 	char buf[MAXLINE];
-	printf("ayo I'm a printing shit so stfu bitch\n");
+	int i = 0;
+	printf("dup2 pfd\n", i);
 	dup2(pfd[0], STDIN_FILENO);
+	printf("closing: %d\n", i);
+	i++;
 	close(pfd[0]);
+	printf("closing: %d\n", i);
+	i++;
 	close(pfd[1]);
-	
+	printf("dup2 sfd\n", i);
 	dup2(sfd[1], STDOUT_FILENO);
+	printf("closing: %d\n", i);
+	i++;
 	close(sfd[1]);
+	printf("closing: %d\n", i);
+	i++;
 	close(sfd[0]);
 	printf("looping through shit yo\n");
 	while(fgets(buf, MAXLINE, stdin)) {
