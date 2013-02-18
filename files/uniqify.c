@@ -117,11 +117,13 @@ int main(int argc, char *argv[])
 	
 	// set timer
 	
+	printf("main: setting num_pipes, malloc()'ing fpin, and calling init_pipes\n");
 	num_pipes = atoi(argv[1]);
 	fpin = (FILE **) malloc(num_pipes * sizeof(FILE *));
 	pfd = init_pipes(num_pipes);
 	sfd = init_pipes(num_pipes);
 	
+	printf("main: creating children\n");
 	for(i = 0; i < num_pipes; i++) {
 		switch(fork()) {
 		case -1:
@@ -138,17 +140,20 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	
+	printf("main: done creating children\n");
+	printf("main: calling parser\n");
 	parser(pfd, num_pipes);
 	
-	while(wait(&status))
+	/*while(wait(&status))
 		if(errno == ECHILD)
-			break;
-		
+			break;*/
+	printf("main: calling merge_uniq\n");
 	fpout = merge_uniq(fpin, num_pipes - 1);
 	
+	printf("main: printing out sorted list\n");
 	while(fgets(buf, MAXLINE, fpout))
 		printf("%s", buf);
+	printf("main: done, goodbye\n");
 	return 0;
 }
 
@@ -157,30 +162,31 @@ int** init_pipes(int num_pipes)
 	int i;
 	int **pfd;
 	
+	printf("init_pipes: malloc()'ing pipes\n");
 	pfd = (int **) malloc(num_pipes * sizeof(int *));
 	
+	printf("init_pipes: creating pipes\n");
 	for(i = 0; i < num_pipes; i++) {
 		pfd[i] = (int *) malloc(2 * sizeof(int));
 		if(pipe(pfd[i]))
 			puke_exit("Pipes", PARENT);
 	}
-	
+	printf("init_pipes: finished, returning pipes (pfd)\n");
 	return pfd;
 }
 
 void init_sort(int *pfd, int *sfd)
 {
-	char buf[MAXLINE];
-	int i = 0;
-	int result;
-	
-	close(STDIN_FILENO);
+	//close(STDIN_FILENO);
+	printf("init_sort: dup2'ing pfd[0] and STDIN_FILENO\n");
 	dup2(pfd[0], STDIN_FILENO);
 	
 	
-	close(STDOUT_FILENO);
+	//close(STDOUT_FILENO);
+	printf("init_sort: dup2'ing sfd[1] and STDOUT_FILENO\n");
 	dup2(sfd[1], STDOUT_FILENO);
 	
+	printf("init_sort: closing all file descriptors (sfd and pfd)\n");
 	close(sfd[1]);
 	close(pfd[1]);
 	close(sfd[0]);
@@ -192,8 +198,9 @@ void init_sort(int *pfd, int *sfd)
 	fclose(stdin);
 	fclose(stdout);
 	printf("done sorting;;;;\n"); // */
+	printf("exec()'ing sort\n");
 	execlp("sort", "sort", (char *) NULL);
-	_exit(EXIT_SUCCESS);
+	_exit(EXIT_FAILURE);
 }
 
 /**
@@ -211,21 +218,23 @@ void parser(int **pfd, int num_pipes)
 	
 	fpout = (FILE **) malloc(num_pipes * sizeof(FILE *));
 	// need to parse stuff yo
-	
+	printf("parser: opening write files\n");
 	for(i = 0; i < num_pipes; i++)
 		fpout[i] = fdopen(pfd[i][1], "w"); // open each stream
 	
 	i = 0;
+	printf("parser: going through fgets loop\n");
 	while(fgets(buf, MAXLINE, stdin)) {
 		// parse buf
 		i = i % num_pipes;
 		fputs(buf, fpout[i]);
 		i++;
 	}
-	printf("Got out\n");
+	printf("parser: done with fgets loop\n");
 	for(i = 0; i < num_pipes; i++)
 		fclose(fpout[i]);	// flush each stream
-	printf("closed errthang\n");
+	printf("parser: closing write files\n");
+	printf("parser: finished with parser\n");
 	return;
 }
 
@@ -236,21 +245,22 @@ void parser(int **pfd, int num_pipes)
 **/
 FILE* merge_uniq(FILE **fpin, int cur)
 {
-	printf("I'm merging but not really? cur=%d\n", cur);
+	printf("Starting merge for cur = %d\n", cur);
 	if(cur == 0)
 		return fpin[0];
-	printf("[BEFO]MERGIN AT: %d\n", cur);
+	printf("[Before]Merging at: cur = %d\n", cur);
 	FILE **merger;
 	merger = (FILE **) malloc(2 * sizeof(FILE *));
 	merger[0] = fpin[cur];
 	merger[1] = merge_uniq(fpin, cur - 1);
-	printf("[AFTA]MERGIN AT: %d\n", cur);
+	printf("[After]Merging at: cur = %d\n", cur);
+	printf("[After]Calling mrg_two: cur = %d\n", cur);
 	return mrg_two(merger);
 }
 
 FILE* mrg_two(FILE **fpin)
 {
-	printf("initing stuffffff\n");
+	printf("Starting mrg_two\n");
 	char cur[MAXLINE];
 	char nxt[MAXLINE];
 	int cmp;
@@ -258,21 +268,21 @@ FILE* mrg_two(FILE **fpin)
 	int x;
 	FILE **new;
 	
-	printf("boobs\n");
+	printf("First fgets in mrg_two\n");
 	if(!fgets(nxt, MAXLINE, fpin[0])) {
 		fclose(fpin[0]);
 		return fpin[1];
 	}
-	printf("butssssss\n");
+	printf("Finished first fgets, now piping\n");
 	if(pipe(pfd))
 		puke_exit("Piping", PARENT);
-	printf("made pipes\n");
+	printf("Made some pipes\n");
 	new = (FILE **) malloc(2 * sizeof(FILE *));
 	new[0] = fdopen(pfd[0], "r");
 	new[1] = fdopen(pfd[1], "w");
 	
 	x = 1;
-	printf("about to loooooop\n");
+	printf("About to fgets loop\n");
 	while(fgets(cur, MAXLINE, fpin[x])) {
 		cmp = strcmp(cur, nxt);
 		if(cmp < 0) {
@@ -284,15 +294,15 @@ FILE* mrg_two(FILE **fpin)
 			x = (x + 1) % 2;
 		}
 	}
-	printf("done loopen\n");
+	printf("Finished the loop\n");
 	
 	x = (x + 1) % 2;
-	printf("putting nxt\n");
+	printf("fputs'ing nxt\n");
 	fputs(nxt, new[1]);
-	printf("about to loooooop the last bit\n");
+	printf("About to loop remainder file\n");
 	while(fgets(cur, MAXLINE, fpin[x]))
 		fputs(cur, new[1]);
-	printf("done loopin\n");
+	printf("Done looping\n");
 	fclose(fpin[0]);
 	fclose(fpin[1]);
 	fclose(new[1]);
