@@ -124,25 +124,29 @@ int main(int argc, char *argv[])
 	
 	for(i = 0; i < num_pipes; i++) {
 		switch(fork()) {
-			case -1:
-				puke_exit("Fork", PARENT);
-				break;
-			case  0:
-				init_sort(pfd[i], sfd[i]);
-				break;
-			default:
-				break;
+		case -1:
+			puke_exit("Fork", PARENT);
+			break;
+		case  0:
+			init_sort(pfd[i], sfd[i]);
+			break;
+		default:
+			close(sfd[i][1]);
+			close(pfd[i][0]);
+			fpin[i] = fdopen(sfd[i][0], "r");
+			break;
 		}
 	}
 	
 	
-	for(i = 0; i < num_pipes; i++) {
-		close(sfd[i][1]);
-		close(pfd[i][0]);
-		fpin[i] = fdopen(sfd[i][0], "r");
-	}
 	parser(pfd, num_pipes);
+	
+	while(wait(&status))
+		if(errno == ECHILD)
+			break;
+		
 	fpout = merge_uniq(fpin, num_pipes - 1);
+	
 	while(fgets(buf, MAXLINE, fpout))
 		printf("%s", buf);
 	return 0;
@@ -215,7 +219,6 @@ void parser(int **pfd, int num_pipes)
 	while(fgets(buf, MAXLINE, stdin)) {
 		// parse buf
 		i = i % num_pipes;
-		printf("FGETS: buf=%si=%d\n", buf, i);
 		fputs(buf, fpout[i]);
 		i++;
 	}
@@ -234,17 +237,8 @@ void parser(int **pfd, int num_pipes)
 FILE* merge_uniq(FILE **fpin, int cur)
 {
 	printf("I'm merging but not really? cur=%d\n", cur);
-	if(cur == 0) {
-		int pfd[2];
-		char buf[MAXLINE];
-		pipe(pfd);
-		FILE * pfile = fdopen(pfd[1], "w");
-		while(fgets(buf, MAXLINE, fpin[0]))
-			fputs(buf, pfile);
-		fclose(pfile);
-		fclose(fpin[0]);
-		return fdopen(pfd[0], "r");
-	}
+	if(cur == 0)
+		return fpin[0];
 	printf("[BEFO]MERGIN AT: %d\n", cur);
 	FILE **merger;
 	merger = (FILE **) malloc(2 * sizeof(FILE *));
