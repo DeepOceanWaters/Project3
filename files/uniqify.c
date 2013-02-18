@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
 	int **pfd; // an array of pipe file descriptors for child-parent com
 	int **sfd; // an array of pipe file descriptors for sort
 	int i;
+	int status;
 	int num_pipes;
 	FILE **fpin;
 	FILE *fpout;
@@ -143,11 +144,12 @@ int main(int argc, char *argv[])
 		fpin[i] = fdopen(sfd[i][0], "r");
 	}
 	parser(pfd, num_pipes);
+	wait(&status);
 	printf("sup about to merge yo\n");
 	fpout = merge_uniq(fpin, 0, num_pipes - 1);
 	printf("done mergin yo\n");
 	while(fgets(buf, MAXLINE, fpout))
-		printf("%s\n", buf);
+		printf("%s", buf);
 	return 0;
 }
 
@@ -174,7 +176,7 @@ void init_sort(int *pfd, int *sfd)
 	int result;
 	printf("dup2 pfd = %d\n", pfd[0]);
 	close(STDIN_FILENO);
-	dup2(pfd[0], STDIN_FILENO)
+	dup2(pfd[0], STDIN_FILENO);
 	
 	printf("dup2 sfd\n");
 	close(STDOUT_FILENO);
@@ -187,7 +189,7 @@ void init_sort(int *pfd, int *sfd)
 	
 	printf("looping through shit yo\n");
 	while(fgets(buf, MAXLINE, stdin)) {
-		printf("CHILD IS PUTTING: %s\n", buf);
+		printf("CHILD IS PUTTING: %s", buf);
 		fputs(buf, stdout);
 	}
 	fclose(stdin);
