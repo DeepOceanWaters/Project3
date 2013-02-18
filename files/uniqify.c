@@ -250,12 +250,13 @@ FILE* mrg_two(FILE **fpin)
 	
 	if(pipe(pfd))
 		puke_exit("Piping", PARENT);
-	
+	printf("made pipes\n");
 	new = (FILE **) malloc(2 * sizeof(FILE *));
 	new[0] = fdopen(pfd[0], "r");
 	new[1] = fdopen(pfd[1], "w");
 	
 	x = 1;
+	printf("about to loooooop\n");
 	while(fgets(cur, MAXLINE, fpin[x])) {
 		cmp = strcmp(cur, nxt);
 		if(cmp < 0) {
@@ -267,12 +268,15 @@ FILE* mrg_two(FILE **fpin)
 			x = (x + 1) % 2;
 		}
 	}
+	printf("done loopen\n");
 	
 	x = (x + 1) % 2;
+	printf("putting nxt\n");
 	fputs(nxt, new[1]);
+	printf("about to loooooop the last bit\n");
 	while(fgets(cur, MAXLINE, fpin[x]))
 		fputs(cur, new[1]);
-	
+	printf("done loopin\n");
 	fclose(fpin[0]);
 	fclose(fpin[1]);
 	fclose(new[1]);
