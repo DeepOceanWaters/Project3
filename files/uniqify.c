@@ -73,7 +73,7 @@
 #define CHILD		0
 
 // functions go here:
-void init_pipes(int num_pipes, int *pfd[]);
+int** init_pipes(int num_pipes);
 void init_sort(int *pfd, int *sfd);
 void parser(int **pfd, int num_pipes);
 FILE* merge_uniq(FILE **fpin, int cur, int max);
@@ -118,8 +118,8 @@ int main(int argc, char *argv[])
 	
 	num_pipes = atoi(argv[1]);
 	fpin = (FILE **) malloc(num_pipes * sizeof(FILE *));
-	init_pipes(num_pipes, pfd);
-	init_pipes(num_pipes, sfd);
+	pfd = init_pipes(num_pipes);
+	sfd = init_pipes(num_pipes);
 	
 	for(i = 0; i < num_pipes; i++) {
 		switch(fork()) {
@@ -141,9 +141,10 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void init_pipes(int num_pipes, int **pfd)
+int** init_pipes(int num_pipes)
 {
 	int i;
+	int **pfd;
 	
 	pfd = (int **) malloc(num_pipes * sizeof(int *));
 	
@@ -153,7 +154,7 @@ void init_pipes(int num_pipes, int **pfd)
 			puke_exit("Pipes", PARENT);
 	}
 	
-	return;
+	return pfd;
 }
 
 void init_sort(int *pfd, int *sfd)
