@@ -137,10 +137,12 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	for(i = 0; i < num_pipes; i++)
-		fpin[i] = fdopen(sfd[i][0], "r"); // open each stream
+	/*for(i = 0; i < num_pipes; i++)
+		fpin[i] = fdopen(sfd[i][0], "r"); // open each stream*/
 	
 	parser(pfd, num_pipes);
+	for(i = 0; i < num_pipes; i++)
+		close(pfd[i][1]);
 	printf("sup about to merge yo\n");
 	fpout = merge_uniq(fpin, 0, num_pipes - 1);
 	printf("done mergin yo\n");
@@ -204,7 +206,7 @@ void parser(int **pfd, int num_pipes)
 	while(fgets(buf, MAXLINE, stdin)) {
 		// parse buf
 		i = i % num_pipes;
-		printf("  --- FGETS: buf=%s_i=%d ---  ", buf, i);
+		printf("FGETS: buf=%si=%d\n", buf, i);
 		fputs(buf, fpout[i]);
 		i++;
 	}
@@ -249,7 +251,7 @@ FILE* mrg_two(FILE **fpin)
 		fclose(fpin[0]);
 		return fpin[1];
 	}
-	printf();
+	printf("butssssss\n");
 	if(pipe(pfd))
 		puke_exit("Piping", PARENT);
 	printf("made pipes\n");
