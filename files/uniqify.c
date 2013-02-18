@@ -77,7 +77,7 @@ void init_pipes(int num_pipes, int *pfd[]);
 void init_sort(int *pfd, int *sfd);
 void parser(int **pfd, int num_pipes);
 FILE* merge_uniq(FILE **fpin, int cur, int max);
-FILE* mrg_two(FILE *fpin);
+FILE* mrg_two(FILE **fpin);
 
 void puke_exit(char *msg, int type);
 
@@ -183,12 +183,13 @@ void parser(int **pfd, int num_pipes)
 	
 	int i;
 	int result;
-	FILE fpout[num_pipes];
+	FILE **fpout;
 	
+	fpout = (FILE **) malloc(num_pipes * sizeof(FILE *));
 	// need to parse stuff yo
 	
 	for(i = 0; i < num_pipes; i++)
-		&fpout[i] = fdopen(pfd[i][1], "w"); // open each stream
+		fpout[i] = fdopen(pfd[i][1], "w"); // open each stream
 	
 	i = 0;
 	while(fgets(buf, MAXLINE, stdin)) {
