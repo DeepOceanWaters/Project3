@@ -137,8 +137,8 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	//for(i = 0; i < num_pipes; i++)
-	//	fpin[i] = fdopen(sfd[i][0], "r"); // open each stream
+	for(i = 0; i < num_pipes; i++)
+		fpin[i] = fdopen(sfd[i][0], "r"); // open each stream
 	
 	parser(pfd, num_pipes);
 	printf("sup about to merge yo\n");
@@ -146,7 +146,9 @@ int main(int argc, char *argv[])
 	printf("done mergin yo\n");
 	while(fgets(buf, MAXLINE, fpout))
 		printf("%s\n", buf);
-	
+	/*for(i = 0; i < num_pipes; i++) {
+		while(fgets(buf, MAXLINE, fpout))
+	}*/
 	return 0;
 }
 
