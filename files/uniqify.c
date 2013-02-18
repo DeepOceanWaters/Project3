@@ -97,8 +97,8 @@ void run_tests();
 
 int main(int argc, char *argv[])
 {
-	int *pfd[2]; // an array of pipe file descriptors for child-parent com
-	int *sfd[2]; // an array of pipe file descriptors for sort
+	int **pfd; // an array of pipe file descriptors for child-parent com
+	int **sfd; // an array of pipe file descriptors for sort
 	int i;
 	int num_pipes;
 	FILE **fpin;
@@ -123,16 +123,9 @@ int main(int argc, char *argv[])
 	
 	for(i = 0; i < num_pipes; i++) {
 		switch(fork()) {
-			case -1:
-				puke_exit("Fork", PARENT);
-				break;
-			case  0:
-				init_sort(pfd[i], sfd[i]);
-				_exit(EXIT_FAILURE);
-				break;
-			default:
-				close(sfd[i][1]);
-				break;
+			case -1: puke_exit("Fork", PARENT);
+			case  0: init_sort(pfd[i], sfd[i]);
+			default: close(sfd[i][1]);
 		}
 	}
 	
@@ -148,14 +141,17 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void init_pipes(int num_pipes, int *pfd[])
+void init_pipes(int num_pipes, int **pfd)
 {
 	int i;
 	
-	pfd = (int **) malloc(num_pipes * sizeof(int*));
+	pfd = (int **) malloc(num_pipes * sizeof(int *));
 	
-	for(i = 0; i < num_pipes; i++)
-		if(pipe(pfd[i]) != 0) puke_exit("Pipes", PARENT);
+	for(i = 0; i < num_pipes; i++) {
+		pfd[i] = (int *) malloc(2 * sizeof(int));
+		if(pipe(pfd[i]))
+			puke_exit("Pipes", PARENT);
+	}
 	
 	return;
 }
@@ -172,6 +168,7 @@ void init_sort(int *pfd, int *sfd)
 	
 	execlp("sort", "sort", (char *) NULL);
 }
+
 /**
  * for now, just initializing the function
  * will add args and return values when appropriate
