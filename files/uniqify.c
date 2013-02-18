@@ -222,10 +222,12 @@ FILE* merge_uniq(FILE **fpin, int cur, int max)
 {
 	if(cur == max)
 		return fpin[max];
+	printf("[BEFO]MERGIN AT: %d/%d", cur, max);
 	FILE **merger;
 	merger = (FILE **) malloc(2 * sizeof(FILE *));
 	merger[0] = fpin[cur];
 	merger[1] = merge_uniq(fpin, cur + 1, max);
+	printf("[AFTA]MERGIN AT: %d/%d", cur, max);
 	return mrg_two(merger);
 }
 
