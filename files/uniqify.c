@@ -105,6 +105,9 @@ int main(int argc, char *argv[])
 	FILE *fpout;
 	char buf[MAXLINE];
 	
+	spike_stdin();
+	exit(0);
+	
 	if(argc < 2) {
 		printf("uniqify: number of pipes is required.\n");
 		exit(EXIT_FAILURE);
