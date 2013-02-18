@@ -236,6 +236,7 @@ FILE* merge_uniq(FILE **fpin, int cur, int max)
 
 FILE* mrg_two(FILE **fpin)
 {
+	printf("initing stuffffff\n");
 	char cur[MAXLINE];
 	char nxt[MAXLINE];
 	int cmp;
@@ -243,11 +244,12 @@ FILE* mrg_two(FILE **fpin)
 	int x;
 	FILE **new;
 	
+	printf("boobs\n");
 	if(!fgets(nxt, MAXLINE, fpin[0])) {
 		fclose(fpin[0]);
 		return fpin[1];
 	}
-	
+	printf();
 	if(pipe(pfd))
 		puke_exit("Piping", PARENT);
 	printf("made pipes\n");
