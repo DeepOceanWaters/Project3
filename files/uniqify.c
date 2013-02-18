@@ -130,19 +130,18 @@ int main(int argc, char *argv[])
 				init_sort(pfd[i], sfd[i]);
 				break;
 			default:
-				close(sfd[i][1]);
-				close(pfd[i][0]);
-				fpin[i] = fdopen(sfd[i][0], "r");
 				break;
 		}
 	}
 	
 	/*for(i = 0; i < num_pipes; i++)
 		fpin[i] = fdopen(sfd[i][0], "r"); // open each stream*/
-	
+	for(i = 0; i < num_pipes; i++) {
+		close(sfd[i][1]);
+		close(pfd[i][0]);
+		fpin[i] = fdopen(sfd[i][0], "r");
+	}
 	parser(pfd, num_pipes);
-	for(i = 0; i < num_pipes; i++)
-		close(pfd[i][1]);
 	printf("sup about to merge yo\n");
 	fpout = merge_uniq(fpin, 0, num_pipes - 1);
 	printf("done mergin yo\n");
@@ -513,8 +512,9 @@ void spike_psrt()
 
 void spike_stdin()
 {
-	int pfd[2];
+	/*int pfd[2];
 	int pfd2[2];
+	int i;
 	FILE *fpout;
 	FILE *fpin;
 	
@@ -529,6 +529,7 @@ void spike_stdin()
 	pipe(pfd);
 	pipe(pfd2);
 	
+	for(i = 0; i < 3; i++) {
 	switch((result = fork())) {
 	case -1:
 		// parent effed up yo
@@ -537,12 +538,12 @@ void spike_stdin()
 		break;
 	case  0:
 		// child case
-		dup2(pfd[0], STDIN_FILENO);
-		close(pfd[0]);
-		dup2(pfd2[1], STDOUT_FILENO);
-		close(pfd2[1]);
-		close(pfd[1]);
-		close(pfd2[0]);
+		dup2(pfd[i][0], STDIN_FILENO);
+		close(pfd[i][0]);
+		dup2(pfd2[i][1], STDOUT_FILENO);
+		close(pfd2[i][1]);
+		close(pfd[i][1]);
+		close(pfd2[i][0]);
 		
 		execlp("sort", "sort",  (char*) NULL);
 		_exit(EXIT_FAILURE);
@@ -551,10 +552,12 @@ void spike_stdin()
 		// parent
 		break;
 	}
+	}
 	
 	cnt_size = 0;
-	close(pfd[0]);
-	close(pfd2[1]);
+	
+	close(pfd[i][0]);
+	close(pfd2[i][1]);
 	fpout = fdopen(pfd[1], "w");
 		
 	while(fgets(buf, MAXLINE, stdin))
@@ -567,7 +570,7 @@ void spike_stdin()
 		printf("%s\n", buf);
 	fclose(fpin);
 	
-	return;	
+	return;	//*/
 }
 // Tests
 
