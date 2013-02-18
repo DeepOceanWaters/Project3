@@ -128,7 +128,6 @@ int main(int argc, char *argv[])
 				puke_exit("Fork", PARENT);
 				break;
 			case  0:
-				printf("so many dicks wtf\n");
 				init_sort(pfd[i], sfd[i]);
 				break;
 			default:
@@ -136,15 +135,13 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	/*for(i = 0; i < num_pipes; i++)
-		fpin[i] = fdopen(sfd[i][0], "r"); // open each stream*/
+	
 	for(i = 0; i < num_pipes; i++) {
 		close(sfd[i][1]);
 		close(pfd[i][0]);
 		fpin[i] = fdopen(sfd[i][0], "r");
 	}
 	parser(pfd, num_pipes);
-	wait(&status);
 	printf("sup about to merge yo\n");
 	fpout = merge_uniq(fpin, 0, num_pipes - 1);
 	printf("done mergin yo\n");
