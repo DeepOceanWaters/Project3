@@ -76,7 +76,7 @@
 int** init_pipes(int num_pipes);
 void init_sort(int *pfd, int *sfd);
 void parser(int **pfd, int num_pipes);
-FILE* merge_uniq(FILE **fpin, int cur, int max);
+FILE* merge_uniq(FILE **fpin, int cur);
 FILE* mrg_two(FILE **fpin);
 
 void puke_exit(char *msg, int type);
@@ -142,13 +142,9 @@ int main(int argc, char *argv[])
 		fpin[i] = fdopen(sfd[i][0], "r");
 	}
 	parser(pfd, num_pipes);
-	printf("sup about to merge yo\n");
-	//fpout = merge_uniq(fpin, 0, num_pipes - 1);
-	printf("done mergin yo\n");
-	for(i = 0; i < num_pipes; i++) {
-		while(fgets(buf, MAXLINE, fpin[i]))
-			printf("%s", buf);
-	}
+	fpout = merge_uniq(fpin, num_pipes - 1);
+	while(fgets(buf, MAXLINE, fpout))
+		printf("%s", buf);
 	return 0;
 }
 
@@ -173,14 +169,14 @@ void init_sort(int *pfd, int *sfd)
 	char buf[MAXLINE];
 	int i = 0;
 	int result;
-	printf("dup2 pfd = %d\n", pfd[0]);
+	
 	close(STDIN_FILENO);
 	dup2(pfd[0], STDIN_FILENO);
 	
-	printf("dup2 sfd\n");
+	
 	close(STDOUT_FILENO);
 	dup2(sfd[1], STDOUT_FILENO);
-		
+	
 	close(sfd[1]);
 	close(pfd[1]);
 	close(sfd[0]);
@@ -235,17 +231,17 @@ void parser(int **pfd, int num_pipes)
  *	Merges the information, and uniqifies the words.
  *
 **/
-FILE* merge_uniq(FILE **fpin, int cur, int max)
+FILE* merge_uniq(FILE **fpin, int cur)
 {
-	printf("I'm merging but not really? cur=%d||max=%d\n", cur, max);
-	if(cur == max)
-		return fpin[max];
-	printf("[BEFO]MERGIN AT: %d/%d\n", cur, max);
+	printf("I'm merging but not really? cur=%d\n", cur);
+	if(cur == 0)
+		return fpin[0];
+	printf("[BEFO]MERGIN AT: %d\n", cur);
 	FILE **merger;
 	merger = (FILE **) malloc(2 * sizeof(FILE *));
 	merger[0] = fpin[cur];
-	merger[1] = merge_uniq(fpin, cur + 1, max);
-	printf("[AFTA]MERGIN AT: %d/%d\n", cur, max);
+	merger[1] = merge_uniq(fpin, cur - 1);
+	printf("[AFTA]MERGIN AT: %d\n", cur);
 	return mrg_two(merger);
 }
 
