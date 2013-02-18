@@ -141,8 +141,9 @@ int main(int argc, char *argv[])
 	//	fpin[i] = fdopen(sfd[i][0], "r"); // open each stream
 	
 	parser(pfd, num_pipes);
-	
+	printf("sup about to merge yo\n");
 	fpout = merge_uniq(fpin, 0, num_pipes - 1);
+	printf("done mergin yo\n");
 	while(fgets(buf, MAXLINE, fpout))
 		printf("%s\n", buf);
 	
@@ -208,7 +209,7 @@ void parser(int **pfd, int num_pipes)
 	printf("\n\nGot out\n\n");
 	for(i = 0; i < num_pipes; i++)
 		fclose(fpout[i]);	// flush each stream
-	
+	printf("closed errthang\n");
 	return;
 }
 
