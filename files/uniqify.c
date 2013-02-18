@@ -245,22 +245,22 @@ void parser(int **pfd, int num_pipes)
 **/
 FILE* merge_uniq(FILE **fpin, int cur)
 {
-	printf("Starting merge for cur = %d\n", cur);
+	printf("merge_uniq: starting merge for cur = %d\n", cur);
 	if(cur == 0)
 		return fpin[0];
-	printf("[Before]Merging at: cur = %d\n", cur);
+	printf("merge_uniq: [before] Merging at: cur = %d\n", cur);
 	FILE **merger;
 	merger = (FILE **) malloc(2 * sizeof(FILE *));
 	merger[0] = fpin[cur];
 	merger[1] = merge_uniq(fpin, cur - 1);
-	printf("[After]Merging at: cur = %d\n", cur);
-	printf("[After]Calling mrg_two: cur = %d\n", cur);
+	printf("merge_uniq: [after] Merging at: cur = %d\n", cur);
+	printf("merge_uniq: [after] Calling mrg_two: cur = %d\n", cur);
 	return mrg_two(merger);
 }
 
 FILE* mrg_two(FILE **fpin)
 {
-	printf("Starting mrg_two\n");
+	printf("mrg_two: starting mrg_two\n");
 	char cur[MAXLINE];
 	char nxt[MAXLINE];
 	int cmp;
@@ -268,21 +268,21 @@ FILE* mrg_two(FILE **fpin)
 	int x;
 	FILE **new;
 	
-	printf("First fgets in mrg_two\n");
+	printf("mrg_two: first fgets\n");
 	if(!fgets(nxt, MAXLINE, fpin[0])) {
 		fclose(fpin[0]);
 		return fpin[1];
 	}
-	printf("Finished first fgets, now piping\n");
+	printf("mrg_two: finished first fgets, now piping\n");
 	if(pipe(pfd))
 		puke_exit("Piping", PARENT);
-	printf("Made some pipes\n");
+	printf("mrg_two: made some pipes\n");
 	new = (FILE **) malloc(2 * sizeof(FILE *));
 	new[0] = fdopen(pfd[0], "r");
 	new[1] = fdopen(pfd[1], "w");
 	
 	x = 1;
-	printf("About to fgets loop\n");
+	printf("mrg_two: about to fgets loop\n");
 	while(fgets(cur, MAXLINE, fpin[x])) {
 		cmp = strcmp(cur, nxt);
 		if(cmp < 0) {
@@ -294,15 +294,15 @@ FILE* mrg_two(FILE **fpin)
 			x = (x + 1) % 2;
 		}
 	}
-	printf("Finished the loop\n");
+	printf("mrg_two: finished the loop\n");
 	
 	x = (x + 1) % 2;
-	printf("fputs'ing nxt\n");
+	printf("mrg_two: fputs'ing nxt\n");
 	fputs(nxt, new[1]);
-	printf("About to loop remainder file\n");
+	printf("mrg_two: about to loop remainder file\n");
 	while(fgets(cur, MAXLINE, fpin[x]))
 		fputs(cur, new[1]);
-	printf("Done looping\n");
+	printf("mrg_two: done looping\n");
 	fclose(fpin[0]);
 	fclose(fpin[1]);
 	fclose(new[1]);
