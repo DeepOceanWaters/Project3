@@ -148,9 +148,6 @@ int main(int argc, char *argv[])
 	printf("done mergin yo\n");
 	while(fgets(buf, MAXLINE, fpout))
 		printf("%s\n", buf);
-	/*for(i = 0; i < num_pipes; i++) {
-		while(fgets(buf, MAXLINE, fpout))
-	}*/
 	return 0;
 }
 
@@ -177,10 +174,7 @@ void init_sort(int *pfd, int *sfd)
 	int result;
 	printf("dup2 pfd = %d\n", pfd[0]);
 	close(STDIN_FILENO);
-	if((result = dup2(pfd[0], STDIN_FILENO)) == -1)
-		puke_exit("WOW", CHILD);
-	printf("result   = %d\n", result);
-	perror("dup2-pfd[0]");
+	dup2(pfd[0], STDIN_FILENO)
 	
 	printf("dup2 sfd\n");
 	close(STDOUT_FILENO);
