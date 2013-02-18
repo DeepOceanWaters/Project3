@@ -143,10 +143,12 @@ int main(int argc, char *argv[])
 	}
 	parser(pfd, num_pipes);
 	printf("sup about to merge yo\n");
-	fpout = merge_uniq(fpin, 0, num_pipes - 1);
+	//fpout = merge_uniq(fpin, 0, num_pipes - 1);
 	printf("done mergin yo\n");
-	while(fgets(buf, MAXLINE, fpout))
-		printf("%s", buf);
+	for(i = 0; i < num_pipes; i++) {
+		while(fgets(buf, MAXLINE, fpin[i]))
+			printf("%s", buf);
+	}
 	return 0;
 }
 
@@ -221,7 +223,7 @@ void parser(int **pfd, int num_pipes)
 		fputs(buf, fpout[i]);
 		i++;
 	}
-	printf("\n\nGot out\n\n");
+	printf("Got out\n");
 	for(i = 0; i < num_pipes; i++)
 		fclose(fpout[i]);	// flush each stream
 	printf("closed errthang\n");
