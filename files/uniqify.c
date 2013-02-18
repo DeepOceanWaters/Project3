@@ -139,10 +139,10 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	parser(pfd, num_pipes);
-	
 	for(i = 0; i < num_pipes; i++)
 		fpin[i] = fdopen(sfd[i][0], "r"); // open each stream
+	
+	parser(pfd, num_pipes);
 	
 	fpout = merge_uniq(fpin, 0, num_pipes - 1);
 	while(fgets(buf, MAXLINE, fpout))
