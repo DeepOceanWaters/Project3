@@ -127,6 +127,7 @@ int main(int argc, char *argv[])
 				puke_exit("Fork", PARENT);
 				break;
 			case  0:
+				printf("so many dicks wtf\n");
 				init_sort(pfd[i], sfd[i]);
 				break;
 			default:
@@ -172,6 +173,7 @@ int** init_pipes(int num_pipes)
 void init_sort(int *pfd, int *sfd)
 {
 	char buf[MAXLINE];
+	printf("ayo I'm a printing shit so stfu bitch\n");
 	dup2(pfd[0], STDIN_FILENO);
 	close(pfd[0]);
 	close(pfd[1]);
