@@ -107,8 +107,6 @@ int main(int argc, char *argv[])
 	FILE **fpin;
 	FILE *fpout;
 	char buf[MAXLINE];
-	time_t now;
-	time_t then;
 	
 	if(argc < 2) {
 		printf("uniqify: number of pipes is required.\n");
@@ -120,7 +118,7 @@ int main(int argc, char *argv[])
 	}
 	
 	// set timer
-	time(&now);
+	//time(&now);
 	
 	num_pipes = atoi(argv[1]);
 	pfd = (int **) malloc(num_pipes * sizeof(int *));
@@ -133,10 +131,6 @@ int main(int argc, char *argv[])
 	parser(pfd, num_pipes);
 	fpout = merge_uniq(fpin, num_pipes - 1);
 	rmdup(fpout);
-	
-	time(&then);
-	
-	printf("%f\n", difftime(then, now));
 	
 	return 0;
 }
@@ -320,6 +314,7 @@ void rmdup(FILE *fpout)
 {
 	char buf[MAXLINE];
 	char old_buf[MAXLINE];
+	char new_buf[MAXLINE];
 	int i;
 	
 	i = 1;
@@ -329,8 +324,8 @@ void rmdup(FILE *fpout)
 			i++;
 		else {
 			old_buf[strlen(old_buf) - 1] = *"\0";
-			sprintf(old_buf, "\t%d %s\n", i, old_buf);
-			fputs(old_buf, stdout);
+			sprintf(new_buf, "\t%d %s\n", i, old_buf);
+			fputs(new_buf, stdout);
 			strcpy(old_buf, buf);
 			i = 1;
 		}
