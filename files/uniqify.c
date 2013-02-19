@@ -77,7 +77,7 @@
 void pipe_children(FILE **fpin, int **pfd, int **sfd, int cur);
 void init_sort(int *pfd, int *sfd);
 void parser(int **pfd, int num_pipes);
-void parse_buf(char *buf, FILE **fpout, int *i);
+void parse_buf(char *buf, FILE **fpout, int *i, int num_pipes);
 FILE* merge_uniq(FILE **fpin, int cur);
 FILE* mrg_two(FILE **fpin);
 
@@ -227,11 +227,11 @@ void parse_buf(char *buf, FILE **fpout, int *i, int num_pipes)
 			k++;
 		}
 		else if(strlen(new_buf) > 1) {
-			new_buf[k] = "\n";
-			i = *i % num_pipes;
+			new_buf[k] = *"\n";
+			*i = *i % num_pipes;
 			fputs(new_buf, fpout[*i]);
 			strcpy(new_buf, "");
-			i++;
+			(*i)++;
 			k = 0;
 		}
 	}
