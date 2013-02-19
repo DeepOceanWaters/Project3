@@ -1,0 +1,79 @@
+\documentclass[letterpaper,10pt,titlepage]{article}
+
+\usepackage{graphicx}                                        
+
+\usepackage{amssymb}                                         
+\usepackage{amsmath}                                         
+\usepackage{amsthm}                                          
+
+\usepackage{alltt}                                           
+\usepackage{float}
+\usepackage{color}
+
+\usepackage{url}
+
+\usepackage{balance}
+\usepackage[TABBOTCAP, tight]{subfigure}
+\usepackage{enumitem}
+
+\usepackage{pstricks, pst-node}
+
+\usepackage{geometry}
+\geometry{textheight=10in, textwidth=7.5in}
+
+%random comment
+
+\newcommand{\cred}[1]{{\color{red}#1}}
+\newcommand{\cblue}[1]{{\color{blue}#1}}
+
+\usepackage{hyperref}
+
+\def\name{D. Kevin McGrath}
+
+%pull in the necessary preamble matter for pygments output
+\input{pygments.tex}
+
+%% The following metadata will show up in the PDF properties
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfkeywords = {cs311 ``operating systems'' files filesystem I/O},
+  pdftitle = {CS 311 Project 1: UNIX File I/O},
+  pdfsubject = {CS 311 Project 1},
+  pdfpagemode = UseNone
+}
+
+\parindent = 0.0 in
+\parskip = 0.2 in
+
+\begin{document}
+Project 3: Write Up
+
+
+Design:
+
+The project has 3 sets of two functions, one of which is the helper function. The helper function is only used in the function it is helping. The helper function is used to create better readability and a better, more well designed program.
+
+
+Work log:
+
+I started off by doing some spike tests. I tried out using the sort() function by exec()'ing a child process. I tried fork()'ing, fork()'ing multiple times, and more. Once I felt I knew enough I proceeded to start to write and design the program. 
+
+Writing the program wasn't too hard. However, I did snag when I thought that I was supposed to use only one pipe to communicate the parent with all its children. Eventually I came up with using two pipes for each child, using the children as a sort of sort-filter between pipes.
+
+After that it mostly went smoothly from there, aside from compiler complaints, until I forgot about closing pipes when they aren't being used.
+
+
+Challenges:
+
+The problem came when I was creating children. At first I created all the pipes needed before fork()'ing. I had forgotten that I would need to close all of the pipes that I was not using (I only closed the pipes that pertained to the child created, completely forgetting about the extra pipes). This led to a very strange problem that had me baffled. My program worked as expected when running only 1 pipe. However, if I ran any amount more than 1, then the program would hang. I talked to multiple people asking for help with debugging, all of whom did not catch the problem, but helped steer me in the right direction.
+
+I realized that I needed to look at the problem and potential causes from a different perspective. Eventually, I tried to find out what pipes each process had when (I did this by sleeping and printing the pid of the process sleeping, then using a command to find all pipes and such owned by the process). That's when I realized my mistake. I quickly fixed it, and voila! the program worked as expected for any number of pipes.
+
+Also due to time constraints, I will not be able to upload a plot of timed executions. 
+
+%input the pygmentized output of mt19937ar.c, using a (hopefully) unique name
+%this file only exists at compile time. Feel free to change that.
+%\input{__mt.h.tex}
+\end{document}
