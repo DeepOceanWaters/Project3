@@ -80,6 +80,7 @@ void parser(int **pfd, int num_pipes);
 void parse_buf(char *buf, FILE **fpout, int *i, int num_pipes);
 FILE* merge_uniq(FILE **fpin, int cur);
 FILE* mrg_two(FILE **fpin);
+void rmdup(FILE *fpin);
 
 void puke_exit(char *msg, int type);
 
@@ -128,9 +129,8 @@ int main(int argc, char *argv[])
 	
 	parser(pfd, num_pipes);
 	fpout = merge_uniq(fpin, num_pipes - 1);
+	rmdup(fpout);
 	
-	while(fgets(buf, MAXLINE, fpout))
-		printf("%s", buf);
 	return 0;
 }
 
@@ -309,9 +309,28 @@ FILE* mrg_two(FILE **fpin)
  * for now, just initializing the function
  * will add args and return values when appropriate
 **/
-void rmdup()
+void rmdup(FILE *fpout)
 {
-	// removes duplicates from sorted list of wurds
+	char buf[MAXLINE];
+	char old_buf[MAXLINE];
+	int i;
+	
+	i = 1;
+	fgets(old_buf, MAXLINE, fpout);
+	while(fgets(buf, MAXLINE, fpout)) {
+		if(strcmp(old_buf, buf) == 0)
+			i++;
+		else {
+			old_buf[strlen(old_buf) - 1] = *"\0";
+			sprintf(old_buf, "%s %d\n", old_buf, i);
+			fputs(old_buf, stdout);
+			strcpy(old_buf, buf);
+			i = 1;
+		}
+	}
+	
+	fclose(fpout);
+	return;
 }
 
 /**
