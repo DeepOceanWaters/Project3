@@ -194,7 +194,6 @@ void parser(int **pfd, int num_pipes)
 	char buf[MAXLINE];
 	int i;
 	
-	k = 0;
 	FILE **fpout;
 	
 	fpout = (FILE **) malloc(num_pipes * sizeof(FILE *));
@@ -215,8 +214,8 @@ void parse_buf(char *buf, FILE **fpout, int *i, int num_pipes)
 {
 	char new_buf[MAXLINE];
 	int j;
-	int k;
 	int leng;
+	int k;
 	
 	k = 0;
 	leng = strlen(buf);
@@ -228,6 +227,8 @@ void parse_buf(char *buf, FILE **fpout, int *i, int num_pipes)
 		}
 		else if(strlen(new_buf) > 1) {
 			new_buf[k] = *"\n";
+			k++;
+			new_buf[k] = *"\0";
 			*i = *i % num_pipes;
 			fputs(new_buf, fpout[*i]);
 			strcpy(new_buf, "");
