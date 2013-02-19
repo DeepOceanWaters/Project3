@@ -132,10 +132,10 @@ int main(int argc, char *argv[])
 		case  0:
 			for(j = 0; j < num_pipes; j++) {
 				if(j != i) {
-					close(pfd[1]);
-					close(pfd[0]);
-					close(sfd[1]);
-					close(sfd[0]);
+					close(pfd[j][1]);
+					close(pfd[j][0]);
+					close(sfd[j][1]);
+					close(sfd[j][0]);
 				}
 			}
 			init_sort(pfd[i], sfd[i]);
