@@ -58,6 +58,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <ctype.h>
 // more includes...
 
 // defines...
@@ -74,9 +75,9 @@
 
 // functions go here:
 void pipe_children(FILE **fpin, int **pfd, int **sfd, int cur);
-int** init_pipes(int num_pipes);
 void init_sort(int *pfd, int *sfd);
 void parser(int **pfd, int num_pipes);
+void parse_buf(char *buf, FILE **fpout, int *i);
 FILE* merge_uniq(FILE **fpin, int cur);
 FILE* mrg_two(FILE **fpin);
 
@@ -137,10 +138,13 @@ void pipe_children(FILE **fpin, int **pfd, int **sfd, int cur)
 {
 	int j;
 	
+	pfd[cur] = (int *) malloc(2 * sizeof(int));
+	sfd[cur] = (int *) malloc(2 * sizeof(int));
+	
 	if(pipe(pfd[cur]))
-		puke_exit("Pipes(pfd)");
+		puke_exit("Pipes(pfd)", PARENT);
 	if(pipe(sfd[cur]))
-		puke_exit("Pipes(sfd)");
+		puke_exit("Pipes(sfd)", PARENT);
 		
 	switch(fork()) {
 	case -1:
@@ -160,21 +164,6 @@ void pipe_children(FILE **fpin, int **pfd, int **sfd, int cur)
 		break;
 	}
 	return;
-}
-
-int** init_pipes(int num_pipes)
-{
-	int i;
-	int **pfd;
-	
-	pfd = (int **) malloc(num_pipes * sizeof(int *));
-	
-	for(i = 0; i < num_pipes; i++) {
-		pfd[i] = (int *) malloc(2 * sizeof(int));
-		if(pipe(pfd[i]))
-			puke_exit("Pipes", PARENT);
-	}
-	return pfd;
 }
 
 void init_sort(int *pfd, int *sfd)
@@ -202,28 +191,51 @@ void init_sort(int *pfd, int *sfd)
 **/
 void parser(int **pfd, int num_pipes)
 {
-	// parse stuff
 	char buf[MAXLINE];
-	
 	int i;
-	int result;
+	
+	k = 0;
 	FILE **fpout;
 	
 	fpout = (FILE **) malloc(num_pipes * sizeof(FILE *));
-	// need to parse stuff yo
+	
 	for(i = 0; i < num_pipes; i++)
 		fpout[i] = fdopen(pfd[i][1], "w"); // open each stream
 	
-	i = 0;
-	while(fgets(buf, MAXLINE, stdin)) {
-		// parse buf
-		i = i % num_pipes;
-		fputs(buf, fpout[i]);
-		i++;
-	}
+	while(fgets(buf, MAXLINE, stdin))
+		parse_buf(buf, fpout, &i);
 	
 	for(i = 0; i < num_pipes; i++)
 		fclose(fpout[i]);	// flush each stream
+	
+	return;
+}
+
+void parse_buf(char *buf, FILE **fpout, int *i)
+{
+	char new_buf[MAXLINE];
+	int j;
+	int k;
+	int leng;
+	
+	k = 0;
+	tolower(buf);
+	leng = strlen(buf);
+	
+	for(j = 0; j < leng; j++) {
+		if(islower(buf[j])) {
+			act_buf[k] = buf[j];
+			k++;
+		}
+		else if(strlen(act_buf) > 1) {
+			act_buf[k] = "\n";
+			i = i % num_pipes;
+			fputs(act_buf, fpout[i]);
+			strcpy(act_buf, "");
+			i++;
+			k = 0;
+		}
+	}
 	
 	return;
 }
