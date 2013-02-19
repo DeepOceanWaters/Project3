@@ -215,7 +215,7 @@ void parser(int **pfd, int num_pipes)
 	int i;
 	int result;
 	FILE **fpout;
-	
+	//herp
 	fpout = (FILE **) malloc(num_pipes * sizeof(FILE *));
 	// need to parse stuff yo
 	printf("parser: opening write files\n");
