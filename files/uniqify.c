@@ -73,6 +73,7 @@
 #define CHILD		0
 
 // functions go here:
+void pipe_children(FILE **fpin, int **pfd, int **sfd, int cur);
 int** init_pipes(int num_pipes);
 void init_sort(int *pfd, int *sfd);
 void parser(int **pfd, int num_pipes);
@@ -100,12 +101,9 @@ int main(int argc, char *argv[])
 	int **pfd; // an array of pipe file descriptors for child-parent com
 	int **sfd; // an array of pipe file descriptors for sort
 	int i;
-	int j;
-	int status;
 	int num_pipes;
 	FILE **fpin;
 	FILE *fpout;
-	int pid;
 	char buf[MAXLINE];
 	
 	if(argc < 2) {
@@ -120,43 +118,48 @@ int main(int argc, char *argv[])
 	// set timer
 	
 	num_pipes = atoi(argv[1]);
+	pfd = (int **) malloc(num_pipes * sizeof(int *));
+	sfd = (int **) malloc(num_pipes * sizeof(int *));
 	fpin = (FILE **) malloc(num_pipes * sizeof(FILE *));
-	pfd = init_pipes(num_pipes);
-	sfd = init_pipes(num_pipes);
 	
-	for(i = 0; i < num_pipes; i++) {
-		switch(pid = fork()) {
-		case -1:
-			puke_exit("Fork", PARENT);
-			break;
-		case  0:
-			for(j = 0; j < num_pipes; j++) {
-				if(j != i) {
-					close(pfd[j][1]);
-					close(pfd[j][0]);
-					close(sfd[j][1]);
-					close(sfd[j][0]);
-				}
-			}
-			init_sort(pfd[i], sfd[i]);
-			break;
-		default:
-		
-			close(sfd[i][1]);
-			close(pfd[i][0]);
-			fpin[i] = fdopen(sfd[i][0], "r");
-			break;
-		}
-	}
+	for(i = 0; i < num_pipes; i++)
+		pipe_children(fpin, pfd, sfd, i);
 	
 	parser(pfd, num_pipes);
-	
 	fpout = merge_uniq(fpin, num_pipes - 1);
 	
 	while(fgets(buf, MAXLINE, fpout))
 		printf("%s", buf);
-	
 	return 0;
+}
+
+void pipe_children(FILE **fpin, int **pfd, int **sfd, int cur)
+{
+	int j;
+	
+	if(pipe(pfd[cur]))
+		puke_exit("Pipes(pfd)");
+	if(pipe(sfd[cur]))
+		puke_exit("Pipes(sfd)");
+		
+	switch(fork()) {
+	case -1:
+		puke_exit("Fork", PARENT);
+		break;
+	case  0:
+		for(j = 0; j < cur; j++) {
+			close(sfd[j][0]);
+			close(pfd[j][1]);
+		}
+		init_sort(pfd[cur], sfd[cur]);
+		break;
+	default:
+		close(sfd[cur][1]);
+		close(pfd[cur][0]);
+		fpin[cur] = fdopen(sfd[cur][0], "r");
+		break;
+	}
+	return;
 }
 
 int** init_pipes(int num_pipes)
