@@ -203,7 +203,7 @@ void parser(int **pfd, int num_pipes)
 		fpout[i] = fdopen(pfd[i][1], "w"); // open each stream
 	
 	while(fgets(buf, MAXLINE, stdin))
-		parse_buf(buf, fpout, &i);
+		parse_buf(buf, fpout, &i, num_pipes);
 	
 	for(i = 0; i < num_pipes; i++)
 		fclose(fpout[i]);	// flush each stream
@@ -211,7 +211,7 @@ void parser(int **pfd, int num_pipes)
 	return;
 }
 
-void parse_buf(char *buf, FILE **fpout, int *i)
+void parse_buf(char *buf, FILE **fpout, int *i, int num_pipes)
 {
 	char new_buf[MAXLINE];
 	int j;
@@ -219,19 +219,18 @@ void parse_buf(char *buf, FILE **fpout, int *i)
 	int leng;
 	
 	k = 0;
-	tolower(buf);
 	leng = strlen(buf);
 	
 	for(j = 0; j < leng; j++) {
-		if(islower(buf[j])) {
-			act_buf[k] = buf[j];
+		if(isalpha(buf[j])) {
+			new_buf[k] = tolower(buf[j]);
 			k++;
 		}
-		else if(strlen(act_buf) > 1) {
-			act_buf[k] = "\n";
-			i = i % num_pipes;
-			fputs(act_buf, fpout[i]);
-			strcpy(act_buf, "");
+		else if(strlen(new_buf) > 1) {
+			new_buf[k] = "\n";
+			i = *i % num_pipes;
+			fputs(new_buf, fpout[*i]);
+			strcpy(new_buf, "");
 			i++;
 			k = 0;
 		}
